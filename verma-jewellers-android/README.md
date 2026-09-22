@@ -9,14 +9,22 @@ a server. No sign-in, no account, no network permission at all —
 
 ## How rates get set
 
-Tap **⚙ Admin** in the footer, create a 4-digit PIN on first use,
-then enter today's market rate + your margin for gold and silver.
-Everything — the PIN, the margin, and the final rate shown to anyone
-looking at this device — is saved in this WebView's own local storage,
-**on this device only**. There's no sync between phones: if you want
-the same rate showing on a second device (say, a customer-facing
-tablet at the counter), you set it there separately, or just use one
-device as the shop's rate display.
+There's no visible admin button — **tap the header crest logo 4 times**
+within about 1.5 seconds to open it (a secret entry point, not a public
+button). Create a 4-digit PIN on first use, then enter today's market
+rate + your margin for gold and, optionally, silver. Everything — the
+PIN, the margin, the final rate, and any stock photos — is saved in
+this WebView's own local storage, **on this device only**. There's no
+sync between phones: if you want the same rate showing on a second
+device (say, a customer-facing tablet at the counter), you set it
+there separately, or just use one device as the shop's rate display.
+
+Two more admin options:
+- **Show silver rate to customers** — uncheck to display gold only.
+- **Stock photos** — up to 2 photos from the phone's gallery/camera,
+  shown below the rates. Resized/compressed client-side (max ~900px,
+  JPEG) before being stored, so it stays well within localStorage's
+  per-origin size limit.
 
 ## Why this doesn't build here
 

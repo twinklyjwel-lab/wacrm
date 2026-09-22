@@ -68,7 +68,8 @@
 
   .topbar{
     background:var(--olive-950);
-    padding-block:10px;
+    padding-top:calc(10px + env(safe-area-inset-top, 0px));
+    padding-bottom:10px;
     padding-inline:16px;
     display:flex;
     justify-content:flex-end;
@@ -215,25 +216,66 @@
     margin:8px auto 0;
     padding:20px 16px 40px;
     display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
+    justify-content:center;
   }
   footer .fine-print{
     font:500 12px/1.5 "Inter",sans-serif;
     color:var(--ink-soft);
     max-width:440px;
+    text-align:center;
   }
-  .admin-link{
-    appearance:none;border:1px solid var(--border);background:var(--surface);
-    color:var(--ink-soft);
-    font:600 12px/1 "Inter",sans-serif;
-    padding:9px 14px;border-radius:999px;cursor:pointer;
-    display:inline-flex;align-items:center;gap:6px;flex-shrink:0;
+
+  .stock-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+    gap:12px;
+    margin-bottom:8px;
+  }
+  .stock-photo{
+    width:100%;
+    aspect-ratio:1;
+    object-fit:cover;
+    border-radius:16px;
+    border:1px solid var(--border);
     box-shadow:var(--shadow);
+    display:block;
   }
-  .admin-link:hover{color:var(--ink)}
-  .admin-link:focus-visible{outline:2px solid var(--gold-500);outline-offset:2px}
+
+  .checkbox-field{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .checkbox-field input{width:18px;height:18px;accent-color:var(--gold-500)}
+  .checkbox-field label{font:600 14px/1.3 "Inter",sans-serif;color:var(--ink);margin:0}
+
+  .stock-picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stock-picker-slot{
+    border:1px dashed var(--border);
+    border-radius:14px;
+    padding:10px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    text-align:center;
+  }
+  .stock-picker-preview{
+    width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;
+  }
+  .stock-picker-btn{
+    display:inline-block;
+    font:600 12px/1 "Inter",sans-serif;
+    color:var(--ink);
+    background:var(--row);
+    border:1px solid var(--border);
+    padding:8px 12px;border-radius:999px;cursor:pointer;
+  }
+  .stock-picker-remove{
+    appearance:none;border:none;background:transparent;
+    color:#b3392f;font:600 12px/1 "Inter",sans-serif;cursor:pointer;padding:2px;
+  }
 
   .sheet-backdrop{
     position:fixed;inset:0;
@@ -338,7 +380,7 @@
 </div>
 
 <header class="brand">
-  <img class="crest" src="data:image/jpeg;base64,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" alt="Verma Jewellers crest">
+  <img class="crest" id="crestLogo" src="data:image/jpeg;base64,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" alt="Verma Jewellers crest">
   <div class="wordmark">VERMA JEWELLERS</div>
   <div class="tagline" data-i18n="tagline">Firozpur, Punjab</div>
 </header>
@@ -386,24 +428,33 @@
   </div>
   <div class="tentative" data-i18n="tentative">(tentative rate)</div>
 
-  <div class="group-label" data-i18n="silverGroup">Silver</div>
-  <div class="rate-group">
-    <div class="rate-row">
-      <div class="purity">
-        <span class="name" data-i18n="silver999">Silver</span>
-        <span class="note" data-i18n="fine">999 &middot; Fine</span>
+  <div id="silverSection">
+    <div class="group-label" data-i18n="silverGroup">Silver</div>
+    <div class="rate-group">
+      <div class="rate-row">
+        <div class="purity">
+          <span class="name" data-i18n="silver999">Silver</span>
+          <span class="note" data-i18n="fine">999 &middot; Fine</span>
+        </div>
+        <div class="price">
+          <span class="amount" id="priceSilverKg">&#8377;0</span>
+          <span class="unit" data-i18n="perKg">per kilogram</span>
+        </div>
       </div>
-      <div class="price">
-        <span class="amount" id="priceSilverKg">&#8377;0</span>
-        <span class="unit" data-i18n="perKg">per kilogram</span>
-      </div>
+    </div>
+  </div>
+
+  <div id="stockSection" hidden>
+    <div class="group-label" data-i18n="ourStock">Our Stock</div>
+    <div class="stock-grid">
+      <img class="stock-photo" id="stockImg0" hidden>
+      <img class="stock-photo" id="stockImg1" hidden>
     </div>
   </div>
 </main>
 
 <footer>
   <div class="fine-print" data-i18n="finePrint">Rates shown are indicative. Final billing rate is confirmed in-store.</div>
-  <button class="admin-link" id="openAdmin" type="button">&#9881; <span data-i18n="admin">Admin</span></button>
 </footer>
 
 <div class="sheet-backdrop" id="pinBackdrop" hidden>
@@ -441,17 +492,42 @@
       <input id="marginGold" type="number" inputmode="decimal" min="0" step="1" placeholder="e.g. 500">
       <div class="hint">Remembered on this device for next time.</div>
     </div>
-    <div class="field">
-      <label for="baseSilver">Silver market rate (&#8377; / kg)</label>
-      <input id="baseSilver" type="number" inputmode="decimal" min="0" step="1" placeholder="e.g. 95000">
-    </div>
-    <div class="field">
-      <label for="marginSilver">Your margin (&#8377; / kg)</label>
-      <input id="marginSilver" type="number" inputmode="decimal" min="0" step="1" placeholder="e.g. 1500">
-      <div class="hint">Remembered on this device for next time.</div>
+    <div class="checkbox-field">
+      <input type="checkbox" id="showSilver" checked>
+      <label for="showSilver">Show silver rate to customers</label>
     </div>
 
-    <div class="preview" id="preview">Customers will see &mdash; 24K: <b id="prevGold">&#8377;0</b>/10g &middot; Silver: <b id="prevSilver">&#8377;0</b>/kg</div>
+    <div id="silverFields">
+      <div class="field">
+        <label for="baseSilver">Silver market rate (&#8377; / kg)</label>
+        <input id="baseSilver" type="number" inputmode="decimal" min="0" step="1" placeholder="e.g. 95000">
+      </div>
+      <div class="field">
+        <label for="marginSilver">Your margin (&#8377; / kg)</label>
+        <input id="marginSilver" type="number" inputmode="decimal" min="0" step="1" placeholder="e.g. 1500">
+        <div class="hint">Remembered on this device for next time.</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Stock photos (optional, shown below the rates)</label>
+      <div class="stock-picker-grid">
+        <div class="stock-picker-slot">
+          <img class="stock-picker-preview" id="stockPreview0" hidden>
+          <label class="stock-picker-btn" for="stockFile0">Choose photo</label>
+          <input type="file" accept="image/*" id="stockFile0" hidden>
+          <button type="button" class="stock-picker-remove" id="stockRemove0" hidden>&times; Remove</button>
+        </div>
+        <div class="stock-picker-slot">
+          <img class="stock-picker-preview" id="stockPreview1" hidden>
+          <label class="stock-picker-btn" for="stockFile1">Choose photo</label>
+          <input type="file" accept="image/*" id="stockFile1" hidden>
+          <button type="button" class="stock-picker-remove" id="stockRemove1" hidden>&times; Remove</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview" id="preview">Customers will see &mdash; 24K: <b id="prevGold">&#8377;0</b>/10g <span id="prevSilverWrap">&middot; Silver: <b id="prevSilver">&#8377;0</b>/kg</span></div>
     <div class="error-msg" id="adminError"></div>
     <div class="btn-row">
       <button class="btn btn-ghost" id="adminCancel" type="button">Cancel</button>
@@ -460,7 +536,7 @@
   </div>
 </div>
 
-<script id="state-data" type="application/json">{"lang": "en", "isSample": true, "updatedAt": null, "gold": {"rate24k10g": 73500}, "silver": {"rateKg": 95000}}</script>
+<script id="state-data" type="application/json">{"lang": "en", "isSample": true, "updatedAt": null, "gold": {"rate24k10g": 73500}, "silver": {"rateKg": 95000}, "showSilver": true, "stockPhotos": []}</script>
 <script>
 (function(){
   "use strict";
@@ -471,18 +547,21 @@
       silver999:"Silver", purest:"999 &middot; Purest", jewellery:"916 &middot; Jewellery", lightweight:"750 &middot; Lightweight",
       fine:"999 &middot; Fine", per10g:"per 10 grams", perKg:"per kilogram", tentative:"(tentative rate)",
       finePrint:"Rates shown are indicative. Final billing rate is confirmed in-store.", admin:"Admin",
+      ourStock:"Our Stock",
       updated:"Last updated {t}" },
     hi:{ tagline:"फ़िरोज़पुर, पंजाब", eyebrow:"आज की दरें", headline:"सोना और चांदी", sampleFlag:"नमूना दरें",
       goldGroup:"सोना", silverGroup:"चांदी", gold24:"24 कैरेट सोना", gold22:"22 कैरेट सोना", gold18:"18 कैरेट सोना",
       silver999:"चांदी", purest:"999 &middot; शुद्धतम", jewellery:"916 &middot; आभूषण", lightweight:"750 &middot; हल्का",
       fine:"999 &middot; शुद्ध", per10g:"प्रति 10 ग्राम", perKg:"प्रति किलोग्राम", tentative:"(अस्थायी दर)",
       finePrint:"दरें सांकेतिक हैं। अंतिम दर दुकान पर तय होगी।", admin:"एडमिन",
+      ourStock:"हमारा स्टॉक",
       updated:"आखिरी अपडेट {t}" },
     pa:{ tagline:"ਫ਼ਿਰੋਜ਼ਪੁਰ, ਪੰਜਾਬ", eyebrow:"ਅੱਜ ਦੀਆਂ ਦਰਾਂ", headline:"ਸੋਨਾ ਅਤੇ ਚਾਂਦੀ", sampleFlag:"ਨਮੂਨਾ ਦਰਾਂ",
       goldGroup:"ਸੋਨਾ", silverGroup:"ਚਾਂਦੀ", gold24:"24 ਕੈਰਟ ਸੋਨਾ", gold22:"22 ਕੈਰਟ ਸੋਨਾ", gold18:"18 ਕੈਰਟ ਸੋਨਾ",
       silver999:"ਚਾਂਦੀ", purest:"999 &middot; ਸਭ ਤੋਂ ਸ਼ੁੱਧ", jewellery:"916 &middot; ਗਹਿਣੇ", lightweight:"750 &middot; ਹਲਕਾ",
       fine:"999 &middot; ਸ਼ੁੱਧ", per10g:"ਪ੍ਰਤੀ 10 ਗ੍ਰਾਮ", perKg:"ਪ੍ਰਤੀ ਕਿਲੋਗ੍ਰਾਮ", tentative:"(ਆਰਜ਼ੀ ਦਰ)",
       finePrint:"ਦਰਾਂ ਸੰਕੇਤਕ ਹਨ। ਅੰਤਿਮ ਦਰ ਦੁਕਾਨ 'ਤੇ ਤੈਅ ਹੋਵੇਗੀ।", admin:"ਐਡਮਿਨ",
+      ourStock:"ਸਾਡਾ ਸਟਾਕ",
       updated:"ਆਖਰੀ ਅੱਪਡੇਟ {t}" }
   };
 
@@ -491,6 +570,9 @@
     var savedState = localStorage.getItem('vj_rate_state');
     if(savedState) STATE = JSON.parse(savedState);
   }catch(e){}
+  // Defaults for state saved by an older version of this app, before these fields existed.
+  if(STATE.showSilver === undefined) STATE.showSilver = true;
+  if(!STATE.stockPhotos) STATE.stockPhotos = [];
 
   function fmtINR(n){
     return '₹' + Math.round(n).toLocaleString('en-IN');
@@ -526,6 +608,21 @@
     document.getElementById('price22k').textContent = fmtINR(g22);
     document.getElementById('price18k').textContent = fmtINR(g18);
     document.getElementById('priceSilverKg').textContent = fmtINR(STATE.silver.rateKg);
+    document.getElementById('silverSection').hidden = !STATE.showSilver;
+
+    var photos = STATE.stockPhotos || [];
+    var hasPhotos = photos.some(function(p){ return !!p; });
+    document.getElementById('stockSection').hidden = !hasPhotos;
+    [0, 1].forEach(function(i){
+      var img = document.getElementById('stockImg' + i);
+      if(photos[i]){
+        img.src = photos[i];
+        img.hidden = false;
+      } else {
+        img.hidden = true;
+        img.removeAttribute('src');
+      }
+    });
 
     var sampleFlag = document.getElementById('sampleFlag');
     sampleFlag.hidden = !STATE.isSample;
@@ -575,7 +672,7 @@
     renderPinDots();
   }
 
-  document.getElementById('openAdmin').addEventListener('click', function(){
+  function openPinGate(){
     pinMode = getStoredPin() ? 'enter' : 'set';
     document.getElementById('pinTitle').textContent = pinMode === 'set' ? 'Create admin PIN' : 'Admin access';
     document.getElementById('pinSub').textContent = pinMode === 'set'
@@ -583,6 +680,21 @@
       : "Enter your 4-digit admin PIN.";
     resetPin();
     pinBackdrop.hidden = false;
+  }
+
+  // Secret entry point: 4 taps on the header crest within 1.5s, no visible
+  // affordance — replaces a visible "Admin" button per the shop's request.
+  var crestTapCount = 0;
+  var crestTapTimer = null;
+  document.getElementById('crestLogo').addEventListener('click', function(){
+    crestTapCount++;
+    clearTimeout(crestTapTimer);
+    crestTapTimer = setTimeout(function(){ crestTapCount = 0; }, 1500);
+    if(crestTapCount >= 4){
+      crestTapCount = 0;
+      clearTimeout(crestTapTimer);
+      openPinGate();
+    }
   });
   document.getElementById('pinCancel').addEventListener('click', function(){ pinBackdrop.hidden = true; });
 
@@ -616,6 +728,31 @@
 
   function marginKey(metal){ return 'vj_margin_' + metal; }
 
+  var pendingStockPhotos = [];
+
+  function renderStockPickers(){
+    [0, 1].forEach(function(i){
+      var preview = document.getElementById('stockPreview' + i);
+      var removeBtn = document.getElementById('stockRemove' + i);
+      var photo = pendingStockPhotos[i];
+      if(photo){
+        preview.src = photo;
+        preview.hidden = false;
+        removeBtn.hidden = false;
+      } else {
+        preview.hidden = true;
+        preview.removeAttribute('src');
+        removeBtn.hidden = true;
+      }
+    });
+  }
+
+  function updateSilverFieldsVisibility(){
+    document.getElementById('silverFields').hidden = !document.getElementById('showSilver').checked;
+    document.getElementById('prevSilverWrap').hidden = !document.getElementById('showSilver').checked;
+  }
+  document.getElementById('showSilver').addEventListener('change', updateSilverFieldsVisibility);
+
   function openAdminSheet(){
     document.getElementById('adminError').textContent = '';
     document.getElementById('baseGold').value = '';
@@ -624,10 +761,51 @@
     var ms = localStorage.getItem(marginKey('silver'));
     document.getElementById('marginGold').value = mg || '';
     document.getElementById('marginSilver').value = ms || '';
+    document.getElementById('showSilver').checked = !!STATE.showSilver;
+    updateSilverFieldsVisibility();
+    pendingStockPhotos = (STATE.stockPhotos || []).slice();
+    renderStockPickers();
     updatePreview();
     adminBackdrop.hidden = false;
   }
   document.getElementById('adminCancel').addEventListener('click', function(){ adminBackdrop.hidden = true; });
+
+  // Downscale to keep localStorage usage small — a phone photo at full
+  // resolution would be several MB once base64-encoded.
+  function readAndCompressImage(file, callback){
+    var reader = new FileReader();
+    reader.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var maxDim = 900;
+        var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        callback(canvas.toDataURL('image/jpeg', 0.72));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  [0, 1].forEach(function(i){
+    document.getElementById('stockFile' + i).addEventListener('change', function(e){
+      var file = e.target.files && e.target.files[0];
+      if(!file) return;
+      readAndCompressImage(file, function(dataUrl){
+        pendingStockPhotos[i] = dataUrl;
+        renderStockPickers();
+      });
+      e.target.value = '';
+    });
+    document.getElementById('stockRemove' + i).addEventListener('click', function(){
+      pendingStockPhotos[i] = null;
+      renderStockPickers();
+    });
+  });
 
   function readNum(id){
     var v = parseFloat(document.getElementById(id).value);
@@ -646,12 +824,17 @@
   document.getElementById('adminSave').addEventListener('click', function(){
     var baseGold = readNum('baseGold');
     var marginGold = readNum('marginGold');
+    var showSilver = document.getElementById('showSilver').checked;
     var baseSilver = readNum('baseSilver');
     var marginSilver = readNum('marginSilver');
     var errEl = document.getElementById('adminError');
 
-    if(baseGold <= 0 || baseSilver <= 0){
-      errEl.textContent = "Enter today's market rate for both gold and silver.";
+    if(baseGold <= 0){
+      errEl.textContent = "Enter today's gold market rate.";
+      return;
+    }
+    if(showSilver && baseSilver <= 0){
+      errEl.textContent = "Enter today's silver market rate, or turn off “Show silver rate”.";
       return;
     }
 
@@ -663,12 +846,16 @@
     STATE.isSample = false;
     STATE.updatedAt = new Date().toISOString();
     STATE.gold = { rate24k10g: baseGold + marginGold };
-    STATE.silver = { rateKg: baseSilver + marginSilver };
+    STATE.showSilver = showSilver;
+    if(showSilver){
+      STATE.silver = { rateKg: baseSilver + marginSilver };
+    }
+    STATE.stockPhotos = pendingStockPhotos.slice(0, 2);
 
     try{
       localStorage.setItem('vj_rate_state', JSON.stringify(STATE));
     }catch(e){
-      errEl.textContent = "Couldn't save on this device (storage unavailable).";
+      errEl.textContent = "Couldn't save on this device (photos may be too large for storage).";
       return;
     }
 
