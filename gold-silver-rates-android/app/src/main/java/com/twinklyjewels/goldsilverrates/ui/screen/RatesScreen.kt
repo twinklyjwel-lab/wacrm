@@ -17,8 +17,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,63 +24,31 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.twinklyjewels.goldsilverrates.data.model.MetalRate
 import com.twinklyjewels.goldsilverrates.ui.RatesUiState
-import com.twinklyjewels.goldsilverrates.ui.theme.NegativeRed
-import com.twinklyjewels.goldsilverrates.ui.theme.PositiveGreen
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private val SUPPORTED_CURRENCIES = listOf("INR", "USD", "EUR", "GBP", "AED")
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RatesScreen(
     uiState: RatesUiState,
-    onRefresh: () -> Unit,
-    onCurrencyChange: (String) -> Unit
+    onRefresh: () -> Unit
 ) {
-    var currencyMenuExpanded by remember { mutableStateOf(false) }
-    var selectedCurrency by remember { mutableStateOf("INR") }
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Gold & Silver Rates") },
                 actions = {
-                    Box {
-                        TextButton(onClick = { currencyMenuExpanded = true }) {
-                            Text(selectedCurrency)
-                        }
-                        DropdownMenu(
-                            expanded = currencyMenuExpanded,
-                            onDismissRequest = { currencyMenuExpanded = false }
-                        ) {
-                            SUPPORTED_CURRENCIES.forEach { currency ->
-                                DropdownMenuItem(
-                                    text = { Text(currency) },
-                                    onClick = {
-                                        selectedCurrency = currency
-                                        currencyMenuExpanded = false
-                                        onCurrencyChange(currency)
-                                    }
-                                )
-                            }
-                        }
-                    }
                     IconButton(onClick = onRefresh) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                     }
@@ -144,7 +110,7 @@ private fun RatesContent(state: RatesUiState.Success) {
                 val label = if (state.gold.isCached) {
                     "Showing cached rates from $lastUpdated (offline)"
                 } else {
-                    "Last updated $lastUpdated"
+                    "Last updated $lastUpdated · prices in USD"
                 }
                 Text(
                     text = label,
@@ -156,37 +122,28 @@ private fun RatesContent(state: RatesUiState.Success) {
     }
 }
 
+private val usdFormat: NumberFormat = NumberFormat.getCurrencyInstance(Locale.US)
+
 @Composable
 private fun MetalRateCard(rate: MetalRate) {
-    val currencyFormat = remember(rate.currency) {
-        NumberFormat.getCurrencyInstance(Locale.getDefault()).apply {
-            currency = java.util.Currency.getInstance(rate.currency)
-            maximumFractionDigits = 2
-        }
-    }
-
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = rate.metal.label,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                ChangeBadge(changePercent = rate.changePercent)
-            }
+            Text(
+                text = rate.metal.label,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            RateRow(label = "Per gram (24K / fine)", value = currencyFormat.format(rate.pricePerGram24k))
-            RateRow(label = "Per gram (22K)", value = currencyFormat.format(rate.pricePerGram22k))
-            RateRow(label = "Per 10 grams (22K)", value = currencyFormat.format(rate.pricePerTenGram22k))
-            RateRow(label = "Per kilogram", value = currencyFormat.format(rate.pricePerKilogram))
-            RateRow(label = "Per troy ounce (spot)", value = currencyFormat.format(rate.pricePerOunce))
+            rate.metal.purities.forEach { purity ->
+                RateRow(
+                    label = "Per gram (${purity.label})",
+                    value = usdFormat.format(rate.pricePerGram(purity))
+                )
+            }
+            RateRow(label = "Per kilogram (pure)", value = usdFormat.format(rate.pricePerKilogramPure))
+            RateRow(label = "Per troy ounce (spot)", value = usdFormat.format(rate.pricePerOunceUsd))
         }
     }
 }
@@ -200,17 +157,4 @@ private fun RateRow(label: String, value: String) {
         Text(text = label, style = MaterialTheme.typography.bodyMedium)
         Text(text = value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
     }
-}
-
-@Composable
-private fun ChangeBadge(changePercent: Double) {
-    val isPositive = changePercent >= 0
-    val color = if (isPositive) PositiveGreen else NegativeRed
-    val sign = if (isPositive) "+" else ""
-    Text(
-        text = "$sign${"%.2f".format(changePercent)}%",
-        color = color,
-        fontWeight = FontWeight.Bold,
-        style = MaterialTheme.typography.bodyLarge
-    )
 }

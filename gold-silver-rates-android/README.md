@@ -1,67 +1,74 @@
 # Gold & Silver Rates (Android)
 
 A native Android app (Kotlin + Jetpack Compose) that shows live gold and
-silver spot prices — per gram (24K/22K), per 10g, per kg, and per troy
-ounce — with manual refresh, auto-refresh every 15 minutes, multi-currency
-support (INR/USD/EUR/GBP/AED), and an offline cache so the last known
-rate still shows if the network call fails.
+silver spot prices — per gram at common karat/fineness grades, per
+kilogram, and per troy ounce — with manual + auto-refresh (every 5 min)
+and an offline cache so the last known rate still shows if the network
+call fails.
 
 This is a standalone Gradle project, independent of the Next.js CRM at
 the repo root — it doesn't touch or depend on that codebase.
+
+## API: free, no signup required
+
+Uses **[gold-api.com](https://gold-api.com)** — `GET
+https://api.gold-api.com/price/{symbol}` (`XAU` for gold, `XAG` for
+silver). No API key, no rate limit advertised, USD only. This was picked
+over key-gated options (GoldAPI.io, metals-api.com, metalpriceapi.com,
+metals.dev — all free-tier but require signup and cap out around
+50–100 requests/month) so the app works the moment it's installed, with
+nothing to configure.
+
+The API only reports the raw spot price per troy ounce. Per-gram prices
+at each karat/fineness (24K, 22K, 18K for gold; fine/sterling for
+silver) are computed client-side in `MetalRate.kt` using the standard
+purity fractions — the same math jewellers use to quote rates from a
+spot price, not something the API needs to provide.
+
+> This sandbox's network policy couldn't reach gold-api.com to confirm
+> the live response byte-for-byte, so the DTO in
+> `data/model/MetalRateResponse.kt` only relies on the one field
+> (`price`) that's virtually certain to be named that in any price API.
+> If a real request comes back shaped differently, that's the only file
+> that needs fixing.
+
+**Trade-off:** USD only, no 24h change %, since that's what a keyless
+API gives you. If you want INR/other currencies and karat prices
+straight from the API, swap in GoldAPI.io — see "Swapping providers"
+below.
 
 ## Why this doesn't build here
 
 This session runs in a sandboxed container with no Android SDK and no
 network access to `dl.google.com` (the host that serves Android SDK
 platforms/build-tools and mirrors Google's Maven artifacts). Both are
-required to compile an Android app, so the code here has been written
-carefully by hand but **not compiled or run**. Open it in Android Studio
-(which will fetch the SDK + dependencies automatically) to build and test
-it — see steps below.
+required to compile an Android app, so a CI workflow
+(`.github/workflows/android-debug-apk.yml`) builds the debug APK on
+GitHub's own runners instead, which ship with the Android SDK
+preinstalled.
 
-## API choice
+## Get the APK
 
-Researched free options (Sept 2026):
+- **From CI**: check the "Android Debug APK" workflow run for this
+  branch/PR — the built `app-debug.apk` is attached as a workflow
+  artifact.
+- **Build locally**: open this folder in Android Studio (Koala/Ladybug
+  or newer) — it fetches the SDK + dependencies automatically — and run
+  on a device/emulator (minSdk 24 / Android 7.0+), or `./gradlew
+  assembleDebug` from a machine with the Android SDK installed.
 
-| API | Auth | Free tier | Notes |
-|---|---|---|---|
-| **GoldAPI.io** (used here) | API key (free signup) | Free plan available | Returns price per gram pre-split by karat (24K/22K/18K...) directly — ideal for a jewelry-style app, supports 170+ currencies including INR |
-| gold-api.com | None | Unlimited, no key | Simplest option for a quick demo, but less documented/guaranteed uptime and only returns spot price (no per-karat gram prices) |
-| metals-api.com | API key | 50 req/month free | Good if you need historical/currency-conversion data too |
-| metalpriceapi.com | API key | 100 req/month free | Similar to metals-api |
-| metals.dev | API key | 100 req/month free | Sub-60s latency even on free plan |
+This is a **debug build**, fine for sideloading to try it out, but not
+signed for release/Play Store distribution.
 
-**GoldAPI.io** was picked because it returns `price_gram_24k` /
-`price_gram_22k` / `price_gram_18k` directly in the response — exactly
-what a jewelry/consumer rates app needs — without extra client-side math,
-and it supports INR natively.
+## Swapping providers
 
-> The exact JSON field names in `MetalRateResponse.kt` are based on
-> GoldAPI.io's publicly documented schema. This sandbox couldn't reach
-> `goldapi.io` to confirm live output byte-for-byte (network egress here
-> is restricted to a small allowlist), so **verify the response shape
-> against a real API call once you have a key**, and adjust the DTO if
-> any field name has changed.
-
-To switch providers, only two files need to change:
-`data/GoldApiService.kt` (endpoint shape) and
-`data/model/MetalRateResponse.kt` (JSON field names) — the rest of the
-app (repository, ViewModel, UI) is provider-agnostic.
-
-## Setup
-
-1. Sign up at [goldapi.io](https://www.goldapi.io) (free, no credit card) and
-   copy your access token.
-2. Copy `local.properties.example` to `local.properties` and paste your
-   token:
-   ```
-   goldApiKey=goldapi-xxxxxxxxxxxxx
-   ```
-   (`local.properties` is gitignored — never commit real keys.)
-3. Open the `gold-silver-rates-android/` folder in Android Studio
-   (Koala/Ladybug or newer). It will sync Gradle and download the
-   Android SDK bits it needs automatically.
-4. Run on an emulator or device (minSdk 24 / Android 7.0+).
+Only two files define the API contract:
+`data/GoldApiService.kt` (endpoint) and
+`data/model/MetalRateResponse.kt` (JSON shape) — the repository,
+ViewModel, and UI don't know or care which provider is behind them.
+To move to GoldAPI.io for multi-currency + native karat fields, you'd
+also re-add an API key (their free tier requires signup) via
+`local.properties` and a `buildConfigField`.
 
 ## Project structure
 
@@ -73,10 +80,10 @@ app/src/main/java/com/twinklyjewels/goldsilverrates/
     NetworkModule.kt           # OkHttp + Retrofit singleton
     RatesRepository.kt         # fetch + SharedPreferences cache/fallback
     model/
-      MetalRate.kt             # domain model used by the UI
+      MetalRate.kt             # domain model + karat/fineness math
       MetalRateResponse.kt     # raw API response DTO
   ui/
-    RatesViewModel.kt          # polling loop, refresh, currency switch
+    RatesViewModel.kt          # polling loop, refresh
     RatesUiState.kt            # Loading / Success / Error
     screen/RatesScreen.kt      # Compose UI
     theme/                     # Material3 theme (gold/silver palette)
@@ -84,13 +91,8 @@ app/src/main/java/com/twinklyjewels/goldsilverrates/
 
 ## Known limitations / next steps
 
-- Free-tier API quotas are small (often ~100 requests/month). The
-  15-minute default in `RatesViewModel.kt`
-  (`AUTO_REFRESH_INTERVAL_MILLIS`) is a starting point, not a
-  guarantee it fits your plan — check GoldAPI's current terms/pricing
-  before shipping, and consider routing through a server you control
-  that caches responses for all users instead of hitting the API
-  directly from every device.
-- No historical chart yet (GoldAPI.io supports historical data — see
-  their docs — if you want to add one).
+- USD only (see trade-off above).
+- No historical chart.
 - No widget/notification for price alerts yet.
+- Debug-signed only — needs a release signing config before any store
+  distribution.

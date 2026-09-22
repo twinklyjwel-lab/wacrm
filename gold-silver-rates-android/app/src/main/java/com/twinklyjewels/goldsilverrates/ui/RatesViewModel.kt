@@ -11,11 +11,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-// Free-tier metal price APIs typically cap out around 100 requests/month, so this
-// defaults to a conservative 15 minutes (2 calls/refresh * 96 refreshes/day would still
-// blow through that in ~12 hours if left running continuously — lower this only if
-// you're on a paid plan or self-hosting a caching proxy).
-private val AUTO_REFRESH_INTERVAL_MILLIS = java.util.concurrent.TimeUnit.MINUTES.toMillis(15)
+// The free keyless API this app uses has no documented rate limit, but polling gently
+// is still good etiquette for a shared community service.
+private val AUTO_REFRESH_INTERVAL_MILLIS = java.util.concurrent.TimeUnit.MINUTES.toMillis(5)
 
 class RatesViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -24,8 +22,6 @@ class RatesViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow<RatesUiState>(RatesUiState.Loading)
     val uiState: StateFlow<RatesUiState> = _uiState.asStateFlow()
 
-    private var currency = "INR"
-
     init {
         viewModelScope.launch {
             while (true) {
@@ -33,12 +29,6 @@ class RatesViewModel(application: Application) : AndroidViewModel(application) {
                 delay(AUTO_REFRESH_INTERVAL_MILLIS)
             }
         }
-    }
-
-    fun setCurrency(newCurrency: String) {
-        if (newCurrency == currency) return
-        currency = newCurrency
-        refresh()
     }
 
     fun refresh() {
@@ -52,19 +42,18 @@ class RatesViewModel(application: Application) : AndroidViewModel(application) {
             if (current is RatesUiState.Success) _uiState.value = current.copy(isRefreshing = true)
         }
 
-        val goldResult = repository.getRate(Metal.GOLD, currency)
-        val silverResult = repository.getRate(Metal.SILVER, currency)
+        val goldResult = repository.getRate(Metal.GOLD)
+        val silverResult = repository.getRate(Metal.SILVER)
 
         _uiState.value = when {
             goldResult.isSuccess && silverResult.isSuccess -> RatesUiState.Success(
                 gold = goldResult.getOrThrow(),
-                silver = silverResult.getOrThrow(),
-                currency = currency
+                silver = silverResult.getOrThrow()
             )
 
             else -> RatesUiState.Error(
                 (goldResult.exceptionOrNull() ?: silverResult.exceptionOrNull())
-                    ?.message ?: "Could not load rates. Check your connection and API key."
+                    ?.message ?: "Could not load rates. Check your connection."
             )
         }
     }

@@ -1,39 +1,54 @@
 package com.twinklyjewels.goldsilverrates.data.model
 
-enum class Metal(val symbol: String, val label: String) {
-    GOLD("XAU", "Gold"),
-    SILVER("XAG", "Silver")
+/** A gold karat or silver fineness grade, expressed as a fraction of pure metal. */
+data class Purity(val label: String, val fraction: Double)
+
+enum class Metal(val symbol: String, val label: String, val purities: List<Purity>) {
+    GOLD(
+        symbol = "XAU",
+        label = "Gold",
+        purities = listOf(
+            Purity("24K", 1.0),
+            Purity("22K", 22.0 / 24.0),
+            Purity("18K", 18.0 / 24.0)
+        )
+    ),
+    SILVER(
+        symbol = "XAG",
+        label = "Silver",
+        purities = listOf(
+            Purity("Fine (999)", 0.999),
+            Purity("Sterling (925)", 0.925)
+        )
+    )
 }
 
-/** Domain model used by the UI, independent of the upstream API's JSON shape. */
+/**
+ * Domain model used by the UI. The upstream free API only reports the USD spot price per
+ * troy ounce, so per-gram prices at each purity are derived client-side using the standard
+ * karat/fineness fractions above — this is the same math jewellers use to quote gold/silver
+ * rates from the spot price.
+ */
 data class MetalRate(
     val metal: Metal,
-    val currency: String,
-    val pricePerOunce: Double,
-    val pricePerGram24k: Double,
-    val pricePerGram22k: Double,
-    val pricePerGram18k: Double,
-    val changeAmount: Double,
-    val changePercent: Double,
+    val pricePerOunceUsd: Double,
     val fetchedAtMillis: Long,
     val isCached: Boolean = false
 ) {
-    val pricePerTenGram24k: Double get() = pricePerGram24k * 10
-    val pricePerTenGram22k: Double get() = pricePerGram22k * 10
-    val pricePerKilogram: Double get() = pricePerGram24k * 1000
+    private val pricePerGramPure: Double get() = pricePerOunceUsd / TROY_OUNCE_IN_GRAMS
+
+    fun pricePerGram(purity: Purity): Double = pricePerGramPure * purity.fraction
+
+    val pricePerKilogramPure: Double get() = pricePerGramPure * 1000
 
     companion object {
+        const val TROY_OUNCE_IN_GRAMS = 31.1034768
+
         fun fromResponse(metal: Metal, response: MetalRateResponse, isCached: Boolean = false) =
             MetalRate(
                 metal = metal,
-                currency = response.currency,
-                pricePerOunce = response.price,
-                pricePerGram24k = response.price_gram_24k,
-                pricePerGram22k = response.price_gram_22k,
-                pricePerGram18k = response.price_gram_18k,
-                changeAmount = response.ch,
-                changePercent = response.chp,
-                fetchedAtMillis = response.timestamp * 1000L,
+                pricePerOunceUsd = response.price,
+                fetchedAtMillis = System.currentTimeMillis(),
                 isCached = isCached
             )
     }

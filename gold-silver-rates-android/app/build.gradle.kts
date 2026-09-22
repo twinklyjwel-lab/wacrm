@@ -1,18 +1,8 @@
-import java.util.Properties
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
 }
-
-val localProperties = Properties().apply {
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        localPropertiesFile.inputStream().use { load(it) }
-    }
-}
-val goldApiKey: String = localProperties.getProperty("goldApiKey") ?: "goldapi-demo-key"
 
 android {
     namespace = "com.twinklyjewels.goldsilverrates"
@@ -24,10 +14,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
-        // GoldAPI.io free-tier key. Get your own at https://www.goldapi.io
-        // and put it in local.properties as goldApiKey=xxxxx (never commit real keys).
-        buildConfigField("String", "GOLD_API_KEY", "\"$goldApiKey\"")
     }
 
     buildTypes {
@@ -51,7 +37,6 @@ android {
 
     buildFeatures {
         compose = true
-        buildConfig = true
     }
 }
 

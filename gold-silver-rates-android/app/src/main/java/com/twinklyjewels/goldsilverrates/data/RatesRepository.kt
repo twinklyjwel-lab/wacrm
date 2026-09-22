@@ -2,7 +2,6 @@ package com.twinklyjewels.goldsilverrates.data
 
 import android.content.Context
 import com.google.gson.Gson
-import com.twinklyjewels.goldsilverrates.BuildConfig
 import com.twinklyjewels.goldsilverrates.data.model.Metal
 import com.twinklyjewels.goldsilverrates.data.model.MetalRate
 import kotlinx.coroutines.Dispatchers
@@ -20,10 +19,10 @@ class RatesRepository(
         .getSharedPreferences("rates_cache", Context.MODE_PRIVATE)
     private val gson = Gson()
 
-    suspend fun getRate(metal: Metal, currency: String): Result<MetalRate> = withContext(Dispatchers.IO) {
-        val cacheKey = "${metal.symbol}_$currency"
+    suspend fun getRate(metal: Metal): Result<MetalRate> = withContext(Dispatchers.IO) {
+        val cacheKey = metal.symbol
         runCatching {
-            val response = api.getRate(metal.symbol, currency, BuildConfig.GOLD_API_KEY)
+            val response = api.getRate(metal.symbol)
             MetalRate.fromResponse(metal, response).also { rate ->
                 prefs.edit().putString(cacheKey, gson.toJson(rate)).apply()
             }

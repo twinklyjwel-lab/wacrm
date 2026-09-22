@@ -27,8 +27,7 @@ class MainActivity : ComponentActivity() {
                     val uiState by viewModel.uiState.collectAsState()
                     RatesScreen(
                         uiState = uiState,
-                        onRefresh = viewModel::refresh,
-                        onCurrencyChange = viewModel::setCurrency
+                        onRefresh = viewModel::refresh
                     )
                 }
             }

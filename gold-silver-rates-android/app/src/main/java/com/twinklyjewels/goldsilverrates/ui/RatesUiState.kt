@@ -8,7 +8,6 @@ sealed interface RatesUiState {
     data class Success(
         val gold: MetalRate,
         val silver: MetalRate,
-        val currency: String,
         val isRefreshing: Boolean = false
     ) : RatesUiState
 

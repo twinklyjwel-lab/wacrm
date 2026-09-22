@@ -20,7 +20,7 @@ object NetworkModule {
 
     val goldApiService: GoldApiService by lazy {
         Retrofit.Builder()
-            .baseUrl("https://www.goldapi.io/api/")
+            .baseUrl("https://api.gold-api.com/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
