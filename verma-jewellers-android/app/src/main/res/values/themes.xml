@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.VermaJewellers" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/olive_950</item>
+        <item name="android:statusBarColor">@color/olive_950</item>
+        <item name="android:navigationBarColor">@color/olive_950</item>
+    </style>
+</resources>
