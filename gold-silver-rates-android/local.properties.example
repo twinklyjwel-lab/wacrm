@@ -1,0 +1,7 @@
+# Copy this file to local.properties (already gitignored) and fill in real values.
+
+# Path to your Android SDK (Android Studio fills this in automatically).
+# sdk.dir=/Users/you/Library/Android/sdk
+
+# Free personal access token from https://www.goldapi.io (sign up, no credit card).
+goldApiKey=your-goldapi-io-token
