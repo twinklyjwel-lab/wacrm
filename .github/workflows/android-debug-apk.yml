@@ -9,6 +9,9 @@ on:
       - ".github/workflows/android-debug-apk.yml"
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,3 +37,17 @@ jobs:
           name: gold-silver-rates-debug-apk
           path: gold-silver-rates-android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      # Actions artifacts live on Azure Blob Storage, which some networks block outright.
+      # A release asset is served from github.com/objects.githubusercontent.com instead,
+      # which is reachable far more broadly — so also publish it there for easy download.
+      - name: Publish APK as a release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "debug-apk-run-${{ github.run_number }}" \
+            app/build/outputs/apk/debug/app-debug.apk \
+            --repo "${{ github.repository }}" \
+            --title "Gold & Silver Rates debug APK (run ${{ github.run_number }})" \
+            --notes "Automated debug build from commit ${{ github.sha }}. Sideload only — not signed for release/Play Store." \
+            --prerelease
