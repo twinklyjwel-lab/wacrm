@@ -52,8 +52,10 @@ it. Grant the minimum.
 | `webhooks:manage`    | Register and manage outbound webhooks  |
 | `invoices:read`      | List invoices                          |
 | `invoices:write`     | Push invoices (credits loyalty points) |
+| `inventory:read`     | List inventory items and metal rates   |
 | `inventory:write`    | Upsert inventory items and metal rates |
 | `loyalty:read`       | Read a customer's loyalty points       |
+| `loyalty:write`      | Redeem a customer's loyalty points     |
 
 A key with **no scopes** still authenticates and can call
 `GET /api/v1/me` — useful for verifying a key works.
@@ -334,6 +336,17 @@ Scope: `inventory:write`. Fields: `sku`, `name`, `category`, `metal`
 (`per_gram` / `percent` / `fixed`), `making_charge`, `priority`,
 `status` (`in_stock` / `reserved` / `sold`), `notes`.
 
+### `GET /api/v1/inventory`
+
+List articles, newest first. Scope: `inventory:read`. Filters:
+`?metal=gold|silver`, `?status=in_stock|reserved|sold`, `?search=`
+(tag, name or category). Cursor-paginated.
+
+### `GET /api/v1/metal-rates`
+
+`{ "latest": [...], "history": [...] }`: the newest rate per metal and
+purity, plus recent history. Scope: `inventory:read`.
+
 ### `POST /api/v1/metal-rates`
 
 Set rates per gram: one rate or `{ "rates": [...] }`, each
@@ -345,6 +358,13 @@ Set rates per gram: one rate or `{ "rates": [...] }`, each
 A customer's points: `lifetime_earned`, `active_points`, `active_value`
 (₹ today), `bonus_points`, `expired_points`, upcoming `expiring` dates
 and `bonus_ending`. Scope: `loyalty:read`.
+
+### `POST /api/v1/contacts/{id}/loyalty/redeem`
+
+Redeem points: `{ "points": 500, "invoice_id"?: "…", "note"?: "…" }`.
+Scope: `loyalty:write`. Oldest points first, each at its current value.
+Returns `{ "redemption_id", "points", "value" }` (₹ discount). `409` if
+the active balance is short.
 
 ## Pagination
 

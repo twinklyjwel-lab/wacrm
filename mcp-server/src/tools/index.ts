@@ -10,13 +10,16 @@ import type { Config } from '../config.js';
 import { registerReadTools } from './read.js';
 import { registerWriteTools } from './write.js';
 import { registerBroadcastTools } from './broadcast.js';
+import { registerJewelleryReadTools, registerJewelleryWriteTools } from './jewellery.js';
 
 export function registerTools(server: McpServer, client: WacrmClient, config: Config): string[] {
   const enabled: string[] = ['read'];
   registerReadTools(server, client);
+  registerJewelleryReadTools(server, client);
 
   if (config.enableWrites) {
     registerWriteTools(server, client);
+    registerJewelleryWriteTools(server, client);
     enabled.push('write');
   }
 

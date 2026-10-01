@@ -23,8 +23,10 @@ export const API_SCOPES = [
   'webhooks:manage',
   'invoices:read',
   'invoices:write',
+  'inventory:read',
   'inventory:write',
   'loyalty:read',
+  'loyalty:write',
 ] as const;
 
 export type ApiScope = (typeof API_SCOPES)[number];
@@ -40,8 +42,10 @@ export const SCOPE_DESCRIPTIONS: Record<ApiScope, string> = {
   'webhooks:manage': 'Register and manage outbound event webhooks',
   'invoices:read': 'List invoices',
   'invoices:write': 'Push invoices (credits loyalty points)',
+  'inventory:read': 'List inventory items and metal rates',
   'inventory:write': 'Create and update inventory items and metal rates',
   'loyalty:read': "Read a customer's loyalty points",
+  'loyalty:write': "Redeem a customer's loyalty points",
 };
 
 /** Type-narrow an unknown value into a valid `ApiScope`. */

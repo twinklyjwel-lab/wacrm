@@ -31,6 +31,42 @@ write guards:
 | `WACRM_ENABLE_WRITES`     | no       | `true` to expose contact writes + message sending             |
 | `WACRM_ENABLE_BROADCASTS` | no       | `true` to expose mass broadcasts (needs `WACRM_ENABLE_WRITES`) |
 
+### Jewellery CRM build (invoices, loyalty, inventory)
+
+The published `wacrm-mcp` npm package does **not** include the
+jewellery tools below. Run this folder from your own copy of the code
+instead:
+
+```bash
+cd mcp-server
+npm install
+npm run build        # creates mcp-server/dist/index.js
+```
+
+Then point your MCP client at that file:
+
+```jsonc
+{
+  "mcpServers": {
+    "crm": {
+      "command": "node",
+      "args": ["/full/path/to/CRM/mcp-server/dist/index.js"],
+      "env": {
+        "WACRM_BASE_URL": "https://your-crm.example.com",
+        "WACRM_API_KEY": "wacrm_live_xxxxxxxxxxxxxxxxxxxxxxxx",
+        "WACRM_ENABLE_WRITES": "true"
+      }
+    }
+  }
+}
+```
+
+Create the key in **Settings → API keys** with the scopes you want
+Claude to have: for reading, `contacts:read`, `invoices:read`,
+`loyalty:read` and `inventory:read`; to also push data, add
+`contacts:write`, `invoices:write`, `inventory:write` and
+`loyalty:write`. Leave out `WACRM_ENABLE_WRITES` for read-only access.
+
 ### Claude Desktop / Claude Code / Cursor
 
 Add to your MCP client config (e.g. `claude_desktop_config.json`, or
@@ -81,6 +117,14 @@ when their guard is set.
 | `create_contact`     | write     | `contacts:write`     | Create (find-or-create) a contact               |
 | `update_contact`     | write     | `contacts:write`     | Update a contact / replace its tags             |
 | `send_broadcast`     | broadcast | `broadcasts:send`    | Launch a template broadcast (requires `confirm`)|
+| `list_invoices`      | read      | `invoices:read`      | Invoices with lines, rate at purchase, points   |
+| `get_customer_loyalty` | read    | `loyalty:read`       | Points balance, ₹ value, upcoming expiries      |
+| `list_inventory`     | read      | `inventory:read`     | Gold / silver articles, filter by metal/status  |
+| `get_metal_rates`    | read      | `inventory:read`     | Latest rate per gram per purity + history       |
+| `push_invoices`      | write     | `invoices:write`     | Record invoices (credits points, queues thank-you) |
+| `redeem_points`      | write     | `loyalty:write`      | Redeem points, oldest first; returns ₹ discount |
+| `upsert_inventory`   | write     | `inventory:write`    | Add / update articles by tag number             |
+| `set_metal_rates`    | write     | `inventory:write`    | Set the day's gold / silver rates               |
 
 ## Safety model
 

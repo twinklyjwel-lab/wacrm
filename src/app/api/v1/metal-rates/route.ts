@@ -1,4 +1,6 @@
 // ============================================================
+// GET  /api/v1/metal-rates — latest rate per metal + purity, plus the
+// last 30 days of history (scope: inventory:read).
 // POST /api/v1/metal-rates — set today's (or a given day's) gold /
 // silver rate per gram (scope: inventory:write).
 // Body: one rate or `{ "rates": [...] }`, each
@@ -10,6 +12,31 @@ import { ok, fail, toApiErrorResponse } from '@/lib/api/v1/respond';
 import { upsertMetalRates } from '@/lib/loyalty/batch';
 import { formatLocalDate, localDate } from '@/lib/loyalty/dates';
 import { getLoyaltySettings } from '@/lib/loyalty/service';
+
+export async function GET(request: Request) {
+  try {
+    const ctx = await requireApiKey(request, 'inventory:read');
+    const { data, error } = await ctx.supabase
+      .from('metal_rates')
+      .select('metal, purity, rate_per_gram, effective_date')
+      .eq('account_id', ctx.accountId)
+      .order('effective_date', { ascending: false })
+      .limit(300);
+    if (error) return fail('internal', 'Failed to read metal rates', 500);
+    const rows = (data ?? []).map((r) => ({
+      ...r,
+      rate_per_gram: Number(r.rate_per_gram),
+    }));
+    const latest = new Map<string, (typeof rows)[number]>();
+    for (const r of rows) {
+      const k = `${r.metal}|${r.purity}`;
+      if (!latest.has(k)) latest.set(k, r);
+    }
+    return ok({ latest: [...latest.values()], history: rows.slice(0, 150) });
+  } catch (err) {
+    return toApiErrorResponse(err);
+  }
+}
 
 export async function POST(request: Request) {
   try {
