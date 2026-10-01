@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  includedGst,
   InvoiceInputError,
+  normalizeName,
   normalizeIndianPhone,
   parseFlexibleDate,
   parseInvoiceDate,
@@ -32,6 +34,38 @@ describe('dates', () => {
     expect(new Date(parseInvoiceDate('01/10/2026')!).toISOString()).toBe(
       '2026-10-01T06:30:00.000Z'
     );
+  });
+});
+
+describe('Vasy-style invoices', () => {
+  it('accepts a name instead of a mobile and leaves GST unknown', () => {
+    const inv = validateInvoiceInput({
+      external_id: 'TJ-26-10',
+      invoice_date: '27/09/2026',
+      customer: { name: 'Deepti S ' },
+      total: 5550,
+    });
+    expect(inv.customer.phone).toBeNull();
+    expect(inv.customer.name).toBe('Deepti S');
+    expect(inv.tax).toBeNull();
+    expect(inv.total).toBe(5550);
+  });
+  it('needs a mobile or a name', () => {
+    expect(() =>
+      validateInvoiceInput({ external_id: 'X', customer: {} })
+    ).toThrow(/phone or customer.name/);
+  });
+  it('backs out included GST', () => {
+    expect(includedGst(5550, 3)).toBe(161.65);
+    expect(includedGst(103, 3)).toBe(3);
+    expect(includedGst(1000, 0)).toBe(0);
+  });
+  it('reads Excel serial dates', () => {
+    expect(parseFlexibleDate(46292)).toBe('2026-09-27');
+    expect(parseFlexibleDate('46292')).toBe('2026-09-27');
+  });
+  it('normalises names for matching', () => {
+    expect(normalizeName('  Rinky  Singh ')).toBe('rinky singh');
   });
 });
 

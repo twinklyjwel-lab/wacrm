@@ -100,6 +100,26 @@ Other details:
 - **Sold stock:** a tag that matches an inventory item marks that item
   as sold.
 
+#### Vasy "Sales All Data" report
+
+The standard Vasy sales export (`Invoice No.`, `Invoice Date`,
+`Customer Name`, `Net Amount`, `Status`, …) imports as-is:
+
+- **No mobile column:** each invoice is linked to an existing customer
+  with exactly the same name (case and extra spaces ignored). Run
+  **Loyalty → Import birthdays** with your customer list (name + mobile)
+  first. If no customer has that name, or several do (two "Shweta"s),
+  the invoice is listed as failed instead of guessed. Fix it and
+  re-import; invoices already imported are skipped.
+- **No GST column:** `Net Amount` includes GST, so 3% is taken out
+  before points (₹5,550 → GST ₹161.65 → 53 points). The rate is
+  **GST included in totals** in Loyalty → Settings.
+- The trailing **Total** row and any **Cancelled** invoices are skipped.
+- Unpaid (Due / Over Due) invoices earn points straight away.
+
+If you can add a Mobile column to the report in Vasy, invoices link by
+mobile instead, with no name matching needed.
+
 **Inventory → Import** and **Loyalty → Import birthdays** work the same
 way, for article sheets and for customer birthday / anniversary lists.
 

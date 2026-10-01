@@ -57,6 +57,7 @@ export function validateSettingsPatch(body: unknown): Result {
 
   const errors = [
     numField('amount_per_point', 1, 1_000_000),
+    numField('gst_included_rate', 0, 28),
     numField('bonus_value', 0, 1000),
     numField('base_value', 0, 1000),
     numField('bonus_months', 0, 24, true),

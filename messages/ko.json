@@ -1736,7 +1736,8 @@
       "making_charge_type": "세공비 유형",
       "priority": "우선순위",
       "status": "상태",
-      "notes": "메모"
+      "notes": "메모",
+      "phone_or_name": "휴대폰 또는 고객 이름"
     },
     "import": {
       "title": {
@@ -1756,7 +1757,7 @@
       "notMapped": "— 파일에 없음 —",
       "column": "{n}열",
       "missingRequired": "필수: {fields}",
-      "invoiceHint": "포인트는 GST를 제외한 송장 합계 기준으로 적립됩니다(세공비 포함). 피드백 WhatsApp은 최근 3일 이내 송장에 대해서만 다음 날 아침에 발송됩니다.",
+      "invoiceHint": "포인트는 GST를 제외한 송장 합계 기준으로 적립됩니다(세공비 포함). 파일에 GST 열이 없으면 로열티 → 설정의 비율(3%)로 GST를 제외합니다. 휴대폰 열이 없으면 고객 이름이 정확히 일치하는 고객과 연결되므로 고객 목록을 먼저 가져오세요. 취소된 송장과 합계 행은 건너뜁니다. 피드백 WhatsApp은 최근 3일 이내 송장에 대해서만 다음 날 아침에 발송됩니다.",
       "otherFile": "다른 파일 선택",
       "importBtn": "{count}건 가져오기",
       "resultOk": "{count}건 가져옴",
@@ -1988,6 +1989,8 @@
       "pointsTitle": "포인트 규칙",
       "pointsSummary": "GST 제외 금액 ₹{amount}당 1포인트. {bonusMonths}개월 동안 ₹{bonus}, 이후 구매 후 {expiryMonths}개월까지 ₹{base}.",
       "amountPerPoint": "포인트당 사용 금액 (₹)",
+      "gstRate": "합계에 포함된 GST (%)",
+      "gstRateHint": "파일이나 송장에 GST 금액이 없으면 포인트 계산 전에 합계에서 제외합니다.",
       "bonusValue": "초기 포인트 가치 (₹)",
       "bonusMonths": "…적용 개월 수",
       "baseValue": "이후 포인트 가치 (₹)",

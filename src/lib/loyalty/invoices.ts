@@ -98,12 +98,30 @@ export function parseFlexibleDate(v: unknown): string | null {
   if (v === undefined || v === null || v === '') return null;
   if (v instanceof Date)
     return Number.isNaN(v.getTime()) ? null : v.toISOString().slice(0, 10);
+  const serial = excelSerialDate(v);
+  if (serial) return serial;
   const s = String(v).trim();
   let m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
   if (m) return toIsoDate(+m[1], +m[2], +m[3]);
   m = /^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/.exec(s);
   if (m) return toIsoDate(+m[3], +m[2], +m[1]);
   return null;
+}
+
+/**
+ * Excel stores dates as days since 1899-12-30. Accept plausible
+ * serials (1954–2119) so date cells read as numbers still parse.
+ */
+function excelSerialDate(v: unknown): string | null {
+  const n =
+    typeof v === 'number'
+      ? v
+      : /^\d{5}(\.\d+)?$/.test(String(v).trim())
+        ? Number(v)
+        : NaN;
+  if (!Number.isFinite(n) || n < 20000 || n > 80000) return null;
+  const t = new Date(Date.UTC(1899, 11, 30) + Math.floor(n) * 86_400_000);
+  return t.toISOString().slice(0, 10);
 }
 
 function toIsoDate(y: number, mo: number, d: number): string | null {
@@ -150,7 +168,8 @@ export interface NormalizedInvoice {
   external_id: string;
   invoice_date: string;
   customer: {
-    phone: string;
+    /** E.164; null when the source had no mobile (matched by name). */
+    phone: string | null;
     name: string | null;
     email: string | null;
     customer_code: string | null;
@@ -171,7 +190,8 @@ export interface NormalizedInvoice {
   subtotal: number;
   making_total: number;
   discount: number;
-  tax: number;
+  /** Null when the source gave no GST — backed out at ingest. */
+  tax: number | null;
   total: number;
   notes: string | null;
 }
@@ -188,10 +208,16 @@ export function validateInvoiceInput(
     throw new InvoiceInputError('external_id (invoice number) is required');
 
   const c = (r.customer ?? {}) as Record<string, unknown>;
-  const phone = normalizeIndianPhone(String(c.phone ?? ''));
-  if (!/^\+[1-9]\d{6,14}$/.test(phone)) {
+  const rawPhone = str(c.phone);
+  const phone = rawPhone ? normalizeIndianPhone(rawPhone) : null;
+  if (phone !== null && !/^\+[1-9]\d{6,14}$/.test(phone)) {
     throw new InvoiceInputError(
-      `customer.phone is missing or invalid for invoice ${external_id}`
+      `customer.phone is invalid for invoice ${external_id}`
+    );
+  }
+  if (phone === null && !str(c.name)) {
+    throw new InvoiceInputError(
+      `customer.phone or customer.name is required for invoice ${external_id}`
     );
   }
 
@@ -231,8 +257,8 @@ export function validateInvoiceInput(
     num(r.making_total, 'making_total') ??
     lines.reduce((s, l) => s + l.making_charge, 0);
   const discount = num(r.discount, 'discount') ?? 0;
-  const tax = num(r.tax, 'tax') ?? 0;
-  const total = num(r.total, 'total') ?? subtotal - discount + tax;
+  const tax = num(r.tax, 'tax');
+  const total = num(r.total, 'total') ?? subtotal - discount + (tax ?? 0);
   if (total < 0)
     throw new InvoiceInputError(
       `total cannot be negative for invoice ${external_id}`
@@ -261,7 +287,7 @@ export function validateInvoiceInput(
     subtotal: round2(subtotal),
     making_total: round2(making_total),
     discount: round2(discount),
-    tax: round2(tax),
+    tax: tax === null ? null : round2(tax),
     total: round2(total),
     notes: str(r.notes),
   };
@@ -269,6 +295,54 @@ export function validateInvoiceInput(
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
+}
+
+/** GST contained in a GST-inclusive total at `ratePercent` (3% → total × 3/103). */
+export function includedGst(total: number, ratePercent: number): number {
+  if (!Number.isFinite(total) || total <= 0 || !(ratePercent > 0)) return 0;
+  return round2((total * ratePercent) / (100 + ratePercent));
+}
+
+export function normalizeName(name: string): string {
+  return name.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+/**
+ * Resolve a customer by exact (case/space-insensitive) name, for exports
+ * that carry no mobile number. Only a unique match is accepted — two
+ * customers with the same name are reported, never guessed.
+ */
+export async function findContactByName(
+  db: SupabaseClient,
+  accountId: string,
+  name: string
+): Promise<string> {
+  const wanted = normalizeName(name);
+  if (!wanted) throw new InvoiceInputError('Customer name is missing');
+  // ilike pattern: escape wildcards, allow any whitespace run between words.
+  const pattern = wanted
+    .replace(/[\\%_]/g, (m) => `\\${m}`)
+    .split(' ')
+    .join('%');
+  const { data, error } = await db
+    .from('contacts')
+    .select('id, name')
+    .eq('account_id', accountId)
+    .ilike('name', `%${pattern}%`)
+    .limit(50);
+  if (error) throw new Error(`customer lookup failed: ${error.message}`);
+  const matches = (data ?? []).filter(
+    (c) => normalizeName(String(c.name ?? '')) === wanted
+  );
+  if (matches.length === 1) return matches[0].id as string;
+  if (matches.length === 0) {
+    throw new InvoiceInputError(
+      `No customer named '${name.trim()}' — import your customer list (name + mobile) first, or add a Mobile column`
+    );
+  }
+  throw new InvoiceInputError(
+    `${matches.length} customers are named '${name.trim()}' — add a Mobile column to tell them apart`
+  );
 }
 
 export interface IngestResult {
@@ -337,12 +411,17 @@ export async function ingestInvoice(
     };
   }
 
-  const contact = await findOrCreateContact(db, accountId, auditUserId, {
-    phone: invoice.customer.phone,
-    name: invoice.customer.name,
-    email: invoice.customer.email,
-  });
-  if (!contact.created && invoice.customer.name) {
+  const contact = invoice.customer.phone
+    ? await findOrCreateContact(db, accountId, auditUserId, {
+        phone: invoice.customer.phone,
+        name: invoice.customer.name,
+        email: invoice.customer.email,
+      })
+    : {
+        id: await findContactByName(db, accountId, invoice.customer.name ?? ''),
+        created: false,
+      };
+  if (!contact.created && invoice.customer.phone && invoice.customer.name) {
     // Fill a placeholder name (contacts created from an inbound message
     // are named after their phone or WhatsApp profile).
     const { data: c } = await db
@@ -374,7 +453,8 @@ export async function ingestInvoice(
       subtotal: invoice.subtotal,
       making_total: invoice.making_total,
       discount: invoice.discount,
-      tax: invoice.tax,
+      tax:
+        invoice.tax ?? includedGst(invoice.total, settings.gst_included_rate),
       total: invoice.total,
       notes: invoice.notes,
     })

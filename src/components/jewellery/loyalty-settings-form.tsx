@@ -113,6 +113,7 @@ export function LoyaltySettingsForm() {
             store_name: s.store_name,
             google_review_url: s.google_review_url,
             amount_per_point: s.amount_per_point,
+            gst_included_rate: s.gst_included_rate,
             bonus_value: s.bonus_value,
             base_value: s.base_value,
             bonus_months: s.bonus_months,
@@ -209,6 +210,7 @@ export function LoyaltySettingsForm() {
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           {numInput('amount_per_point', t('amountPerPoint'))}
+          {numInput('gst_included_rate', t('gstRate'), t('gstRateHint'))}
           {numInput('bonus_value', t('bonusValue'))}
           {numInput('bonus_months', t('bonusMonths'))}
           {numInput('base_value', t('baseValue'))}

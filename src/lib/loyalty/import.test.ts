@@ -60,6 +60,93 @@ describe('guessMapping', () => {
   });
 });
 
+describe('Vasy "Sales All Data" export', () => {
+  const headers = [
+    '#',
+    'Invoice No.',
+    'Invoice Date',
+    'Due Date',
+    'Customer Name',
+    'Net Amount',
+    'Paid Amount',
+    'Due Amount',
+    'Status',
+    'Payment Status',
+  ];
+  const m = guessMapping(headers, 'invoices');
+
+  it('maps the columns it needs and ignores the rest', () => {
+    expect(m).toMatchObject({
+      external_id: 1,
+      invoice_date: 2,
+      name: 4,
+      total: 5,
+      status: 8,
+      phone: null,
+      tax: null,
+    });
+    expect(missingRequired(m, 'invoices')).toEqual([]);
+  });
+
+  it('skips the Total row and cancelled invoices', () => {
+    const out = groupInvoiceRows(
+      [
+        [
+          1,
+          'TJ-26-10',
+          '27/09/2026',
+          '09/09/2026',
+          'Deepti S',
+          5550,
+          5550,
+          0,
+          'Invoiced',
+          'Paid',
+        ],
+        [
+          2,
+          'TJ-26-17',
+          '10/09/2026',
+          '11/09/2026',
+          'Abhishek Shrivastava',
+          700,
+          0,
+          700,
+          'Invoiced',
+          'Over Due',
+        ],
+        [
+          3,
+          'TJ-26-18',
+          '11/09/2026',
+          null,
+          'X',
+          100,
+          0,
+          100,
+          'Cancelled',
+          'Due',
+        ],
+        ['Total', null, null, null, null, 6350, 5550, 800, null, null],
+      ],
+      m
+    );
+    expect(out.map((i) => i.external_id)).toEqual(['TJ-26-10', 'TJ-26-17']);
+    expect(out[0]).toMatchObject({
+      invoice_date: '27/09/2026',
+      customer: { name: 'Deepti S', phone: undefined },
+      total: 5550,
+      items: [],
+    });
+  });
+
+  it('requires a mobile or name column', () => {
+    expect(missingRequired({ external_id: 0 }, 'invoices')).toEqual([
+      'phone_or_name',
+    ]);
+  });
+});
+
 describe('groupInvoiceRows', () => {
   it('groups lines per bill and takes header values from any row', () => {
     const headers = [

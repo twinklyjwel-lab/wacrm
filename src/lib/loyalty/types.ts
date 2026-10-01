@@ -74,6 +74,8 @@ export interface LoyaltySettings {
   account_id: string;
   enabled: boolean;
   amount_per_point: number;
+  /** GST % contained in totals that come without a GST figure (3 = jewellery). */
+  gst_included_rate: number;
   bonus_value: number;
   base_value: number;
   bonus_months: number;
@@ -96,6 +98,7 @@ export function defaultLoyaltySettings(accountId: string): LoyaltySettings {
     account_id: accountId,
     enabled: true,
     amount_per_point: 100,
+    gst_included_rate: 3,
     bonus_value: 1.5,
     base_value: 1,
     bonus_months: 1,
@@ -133,6 +136,7 @@ export function parseLoyaltySettings(
     account_id: accountId,
     enabled: typeof row.enabled === 'boolean' ? row.enabled : d.enabled,
     amount_per_point: num(row.amount_per_point, d.amount_per_point),
+    gst_included_rate: num(row.gst_included_rate, d.gst_included_rate),
     bonus_value: num(row.bonus_value, d.bonus_value),
     base_value: num(row.base_value, d.base_value),
     bonus_months: num(row.bonus_months, d.bonus_months),

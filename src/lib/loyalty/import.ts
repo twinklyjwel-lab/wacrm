@@ -40,8 +40,9 @@ export const IMPORT_FIELDS: Record<ImportKind, FieldDef[]> = {
       aliases: ['invoice date', 'bill date', 'date', 'voucher date'],
     },
     {
+      // Optional: exports without a mobile column are matched to
+      // existing customers by name (see ingestInvoice).
       key: 'phone',
-      required: true,
       aliases: [
         'mobile',
         'mobile no',
@@ -56,6 +57,11 @@ export const IMPORT_FIELDS: Record<ImportKind, FieldDef[]> = {
     {
       key: 'name',
       aliases: ['customer name', 'customer', 'party name', 'name', 'party'],
+    },
+    {
+      // Invoice status — cancelled / void rows are skipped.
+      key: 'status',
+      aliases: ['status', 'invoice status', 'bill status'],
     },
     {
       key: 'customer_code',
@@ -259,10 +265,18 @@ export function guessMapping(headers: string[], kind: ImportKind): Mapping {
 }
 
 export function missingRequired(mapping: Mapping, kind: ImportKind): string[] {
-  return IMPORT_FIELDS[kind]
+  const missing = IMPORT_FIELDS[kind]
     .filter((f) => f.required && mapping[f.key] == null)
     .map((f) => f.key);
+  // Invoices need a way to find the customer: mobile, or failing that, name.
+  if (kind === 'invoices' && mapping.phone == null && mapping.name == null) {
+    missing.push('phone_or_name');
+  }
+  return missing;
 }
+
+/** Cancelled / voided invoices never earn points. */
+export const CANCELLED_STATUS = /cancel|void|delete/i;
 
 /** RFC-4180-ish CSV parser: quotes, escaped quotes, newlines in quotes, BOM. */
 export function parseCsv(text: string): string[][] {
@@ -357,7 +371,10 @@ export function groupInvoiceRows(
   for (const row of rows) {
     const r = rowToRecord(row, mapping);
     const id = r.external_id == null ? '' : String(r.external_id).trim();
+    // Rows without an invoice number (e.g. a trailing "Total" row) and
+    // cancelled invoices are skipped.
     if (!id) continue;
+    if (r.status != null && CANCELLED_STATUS.test(String(r.status))) continue;
     let entry = byId.get(id);
     if (!entry) {
       entry = { head: {}, items: [] };
@@ -377,7 +394,7 @@ export function groupInvoiceRows(
     external_id: id,
     invoice_date: head.invoice_date ?? undefined,
     customer: {
-      phone: head.phone == null ? '' : String(head.phone),
+      phone: head.phone == null ? undefined : String(head.phone),
       name: head.name ?? undefined,
       email: head.email ?? undefined,
       customer_code:

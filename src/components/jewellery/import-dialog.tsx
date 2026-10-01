@@ -25,6 +25,7 @@ import {
   type ImportKind,
   type Mapping,
 } from '@/lib/loyalty/import';
+import { readXlsxRows } from '@/lib/loyalty/xlsx';
 import { fetchJson, NativeSelect } from './shared';
 
 const ENDPOINT: Record<ImportKind, { url: string; key: string }> = {
@@ -46,8 +47,7 @@ interface RowResult {
 
 async function readFile(file: File): Promise<Cell[][]> {
   if (/\.xlsx$/i.test(file.name)) {
-    const { readSheet } = await import('read-excel-file/browser');
-    return (await readSheet(file)) as Cell[][];
+    return readXlsxRows(new Uint8Array(await file.arrayBuffer()));
   }
   if (/\.xls$/i.test(file.name)) {
     throw new Error('xls');

@@ -1736,7 +1736,8 @@
       "making_charge_type": "Making charge type",
       "priority": "Priority",
       "status": "Status",
-      "notes": "Notes"
+      "notes": "Notes",
+      "phone_or_name": "Mobile or customer name"
     },
     "import": {
       "title": {
@@ -1756,7 +1757,7 @@
       "notMapped": "— not in file —",
       "column": "Column {n}",
       "missingRequired": "Required: {fields}",
-      "invoiceHint": "Points are credited on the invoice total excluding GST (making charges count). Customers get the feedback WhatsApp next morning only for invoices from the last 3 days.",
+      "invoiceHint": "Points are credited on the invoice total excluding GST (making charges count). If the file has no GST column, GST is taken out at the rate in Loyalty → Settings (3%). Without a mobile column, invoices are matched to customers by exact name — import your customer list first. Cancelled invoices and total rows are skipped. Customers get the feedback WhatsApp next morning only for invoices from the last 3 days.",
       "otherFile": "Choose another file",
       "importBtn": "Import {count}",
       "resultOk": "{count, plural, =1 {1 record imported} other {# records imported}}",
@@ -1988,6 +1989,8 @@
       "pointsTitle": "Points rules",
       "pointsSummary": "1 point per ₹{amount} of the bill excluding GST. Worth ₹{bonus} for {bonusMonths, plural, =1 {1 month} other {# months}}, then ₹{base} until {expiryMonths, plural, =1 {1 month} other {# months}} after purchase.",
       "amountPerPoint": "₹ spent per point",
+      "gstRate": "GST included in totals (%)",
+      "gstRateHint": "Taken out of the total before points when the file or invoice has no GST figure.",
       "bonusValue": "Point value at first (₹)",
       "bonusMonths": "…for months",
       "baseValue": "Point value after that (₹)",
