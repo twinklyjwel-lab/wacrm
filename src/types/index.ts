@@ -108,6 +108,13 @@ export interface Contact {
   email?: string;
   company?: string;
   avatar_url?: string;
+  /** Jewellery CRM (migration 037). YYYY-MM-DD. */
+  birthday?: string | null;
+  anniversary?: string | null;
+  /** Customer id in the billing ERP (Vasy). */
+  customer_code?: string | null;
+  /** Excludes the contact from automated loyalty WhatsApps. */
+  loyalty_opt_out?: boolean;
   created_at: string;
   updated_at: string;
   /** Hydrated by queries that embed `contact_tags(tags(*))` (e.g. the

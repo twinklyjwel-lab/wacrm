@@ -38,7 +38,10 @@
     "defaultAvatar": "아바타",
     "menuProfile": "프로필",
     "menuSettings": "설정",
-    "menuSignOut": "로그아웃"
+    "menuSignOut": "로그아웃",
+    "invoices": "송장",
+    "inventory": "재고",
+    "loyalty": "로열티"
   },
   "Header": {
     "dashboard": "대시보드",
@@ -379,7 +382,8 @@
         "tags": "태그",
         "noTags": "태그 없음",
         "noDeals": "딜 없음",
-        "addNotePlaceholder": "메모 추가..."
+        "addNotePlaceholder": "메모 추가...",
+        "loyalty": "로열티"
       },
       "actions": {
         "edit": "수정",
@@ -1352,13 +1356,11 @@
       "deleteLocallyAria": "로컬에서 템플릿 삭제",
       "deleteMetaLocallyTitle": "Meta와 로컬에서 삭제",
       "deleteLocallyTitle": "로컬에서 삭제",
-
       "dialogEditTitle": "메시지 템플릿 수정",
       "dialogNewTitle": "새 메시지 템플릿",
       "dialogEditDesc": "변경 사항을 저장해 Meta에 재제출하세요. 검토 중에는 상태가 다시 대기 중으로 바뀝니다.",
       "dialogNewDesc": "템플릿을 만들어 Meta 승인을 요청하세요. 승인되면 브로드캐스트와 인박스에서 사용할 수 있습니다.",
       "authWarning": "AUTHENTICATION 템플릿은 본문과 OTP 버튼 형식이 고정되어 있어 별도의 빌더가 필요합니다. 지금은 Meta WhatsApp 관리자에서 만든 뒤 <bold>Meta에서 동기화</bold>로 가져오세요.",
-
       "templateName": "템플릿 이름",
       "namePlaceholder": "예: order_confirmation",
       "nameFixed": "템플릿이 Meta에 존재하면 이름이 고정됩니다 — 변경하려면 새 템플릿을 만드세요.",
@@ -1367,7 +1369,6 @@
       "language": "언어",
       "langFixed": "템플릿이 Meta에 존재하면 언어가 고정됩니다.",
       "langHint": "Meta의 정확한 코드와 일치해야 합니다 — <code>en_US</code>와 <code>en</code>은 다른 코드입니다.",
-
       "header": "헤더",
       "headerNone": "없음",
       "headerText": "텍스트",
@@ -1377,7 +1378,6 @@
       "headerTextPlaceholder": "헤더 텍스트 (최대 60자, {{1}} 선택 가능)",
       "headerSampleAria": "헤더 변수 샘플 값",
       "headerSamplePlaceholder": "{{1}}의 샘플 값 (Meta 검토에 필요)",
-
       "uploadImage": "이미지 업로드",
       "uploadHint": "JPEG 또는 PNG, 5MB 이하",
       "mediaUrlPlaceholder": "https://… (또는 공개 {format} 링크 붙여넣기)",
@@ -1385,17 +1385,14 @@
       "mediaHint": "공개적으로 접근 가능한 HTTPS 링크여야 합니다. Meta가 검토 중 한 번 가져오므로 약 24시간 동안 살아있어야 합니다.",
       "videoHint": " 권장: MP4 / 3GPP, 16MB 이하, 60초 이하.",
       "documentHint": " 권장: PDF, 100MB 이하.",
-
       "bodyText": "본문 텍스트",
       "bodyPlaceholder": "안녕하세요 {{1}}님, 주문 {{2}}이(가) 확정되었습니다.",
       "sampleValues": "샘플 값 (Meta가 템플릿 검토에 사용합니다)",
       "bodyHint": "변수에는 {{1}}, {{2}}를 사용하세요 ({{1}}부터 연속되어야 합니다).",
       "sampleAria": "본문 변수 {var}의 샘플 값",
       "samplePlaceholder": "{var}의 샘플",
-
       "footer": "푸터 (선택)",
       "footerPlaceholder": "선택적 푸터 텍스트 (최대 60자)",
-
       "buttons": "버튼 (선택)",
       "addButton": "버튼 추가",
       "buttonsLimit": "최대 {max}개 버튼. QUICK_REPLY 버튼은 URL / 전화 / 코드 복사 버튼보다 앞에 와야 합니다.",
@@ -1408,19 +1405,16 @@
       "urlSamplePlaceholder": "{{1}}의 예시 값 (URL에 변수가 있을 때 필요)",
       "phonePlaceholder": "+15551234567",
       "codePlaceholder": "예시 코드 (예: SUMMER20)",
-
       "cancel": "취소",
       "saving": "저장 중…",
       "submitting": "제출 중…",
       "saveResubmit": "저장 & 재제출",
       "submitApproval": "승인 요청",
-
       "deleteDialogTitle": "템플릿을 삭제하시겠습니까?",
       "deleteMetaDesc": "\"{name}\"이(가) Meta와 wacrm에서 삭제됩니다. 이 템플릿을 사용하는 활성 브로드캐스트는 다음 전송부터 실패하기 시작합니다. 되돌릴 수 없습니다.",
       "deleteLocalDesc": "\"{name}\"이(가) wacrm에서 삭제됩니다. Meta에 제출된 적이 없으므로 별도의 원격 정리가 필요하지 않습니다.",
       "deleting": "삭제 중…",
       "delete": "삭제",
-
       "toastLoadFailed": "템플릿을 불러오지 못했습니다",
       "toastSubmitFailed": "제출하지 못했습니다",
       "toastSubmitEditSuccess": "수정 사항이 제출되었습니다 — Meta는 보통 24시간 이내에 검토합니다.",
@@ -1560,7 +1554,6 @@
       "profileSaved": "프로필이 저장되었습니다",
       "emailChangeFailed": "이메일 변경 실패: {message}",
       "profileSavedEmailCheck": "프로필이 저장되었습니다 — 이메일 주소 변경을 확인하려면 이메일을 확인하세요",
-
       "passwordTitle": "비밀번호",
       "passwordDesc": "최소 {min}자 이상 사용하세요. 변경 후에도 이 기기에서는 로그인이 유지됩니다.",
       "currentPassword": "현재 비밀번호",
@@ -1574,7 +1567,6 @@
       "currentPasswordIncorrect": "현재 비밀번호가 올바르지 않습니다",
       "passwordUpdateFailed": "비밀번호 업데이트 실패: {message}",
       "passwordUpdated": "비밀번호가 업데이트되었습니다",
-
       "sessionsTitle": "활성 세션",
       "sessionsDesc": "이 기기를 포함해 로그인되어 있는 모든 기기에서 로그아웃합니다. 노트북을 분실했거나 비밀번호를 공유한 경우 유용합니다.",
       "signOutAll": "모든 기기에서 로그아웃",
@@ -1714,6 +1706,337 @@
       "reindex": "재색인",
       "reindexTooltip": "모든 문서를 다시 임베딩합니다 (예: 임베딩 키 추가 후)",
       "loading": "불러오는 중…"
+    }
+  },
+  "Jewellery": {
+    "fields": {
+      "external_id": "송장 번호",
+      "invoice_date": "송장 날짜",
+      "phone": "휴대폰",
+      "name": "고객 이름",
+      "customer_code": "고객 코드",
+      "email": "이메일",
+      "birthday": "생일",
+      "anniversary": "기념일",
+      "sku": "태그 / SKU",
+      "description": "품목",
+      "metal": "금속",
+      "purity": "순도",
+      "net_weight": "순중량 (g)",
+      "metal_rate_per_gram": "g당 시세",
+      "making_charge": "세공비",
+      "quantity": "수량",
+      "amount": "금액",
+      "discount": "할인",
+      "tax": "GST / 세금",
+      "total": "송장 합계",
+      "category": "카테고리",
+      "gross_weight": "총중량 (g)",
+      "stone_weight": "스톤 중량 (g)",
+      "making_charge_type": "세공비 유형",
+      "priority": "우선순위",
+      "status": "상태",
+      "notes": "메모"
+    },
+    "import": {
+      "title": {
+        "invoices": "송장 가져오기",
+        "inventory": "재고 가져오기",
+        "customers": "고객 가져오기"
+      },
+      "description": {
+        "invoices": "Vasy ERP에서 내보낸 CSV 또는 Excel 파일을 업로드하세요. 송장 품목당 한 행입니다. 같은 송장 번호의 행은 하나로 합쳐집니다. 같은 송장을 다시 가져와도 안전합니다.",
+        "inventory": "품목 CSV 또는 Excel 시트를 업로드하세요. 기존 태그 / SKU는 업데이트됩니다.",
+        "customers": "생일과 기념일이 포함된 고객 목록을 업로드하세요. 기존 고객은 휴대폰 번호로 매칭됩니다."
+      },
+      "chooseFile": "CSV 또는 Excel(.xlsx) 파일 선택",
+      "fileHint": "오래된 .xls 파일은 먼저 .xlsx 또는 CSV로 저장하세요",
+      "recordCount": "{count}건",
+      "mapColumns": "열 매칭",
+      "notMapped": "— 파일에 없음 —",
+      "column": "{n}열",
+      "missingRequired": "필수: {fields}",
+      "invoiceHint": "포인트는 송장 합계 기준으로 적립됩니다. 피드백 WhatsApp은 최근 3일 이내 송장에 대해서만 다음 날 아침에 발송됩니다.",
+      "otherFile": "다른 파일 선택",
+      "importBtn": "{count}건 가져오기",
+      "resultOk": "{count}건 가져옴",
+      "resultDup": "{count}건은 이미 있어 건너뜀",
+      "resultFailed": "{count}건 실패",
+      "toastDone": "{count}건을 가져왔습니다",
+      "errorEmpty": "파일에 데이터 행이 없습니다",
+      "errorXls": "오래된 .xls 파일은 지원되지 않습니다. .xlsx 또는 CSV로 저장하세요",
+      "errorRead": "파일을 읽을 수 없습니다",
+      "errorImport": "가져오기 실패"
+    },
+    "invoices": {
+      "title": "송장",
+      "subtitle": "Vasy ERP 구매 내역, 적립 포인트 및 구매 시점의 금 / 은 시세",
+      "import": "가져오기",
+      "new": "새 송장",
+      "searchPlaceholder": "송장 번호, 이름 또는 휴대폰 검색",
+      "empty": "아직 송장이 없습니다",
+      "emptyHint": "Vasy ERP 내보내기 파일을 가져오거나, API로 송장을 보내거나, 직접 추가하세요.",
+      "noMatches": "검색과 일치하는 송장이 없습니다",
+      "loadMore": "더 보기",
+      "table": {
+        "invoice": "송장",
+        "customer": "고객",
+        "date": "날짜",
+        "total": "합계",
+        "points": "포인트",
+        "source": "출처"
+      }
+    },
+    "invoiceForm": {
+      "title": "새 송장",
+      "description": "포인트는 자동으로 적립되며 피드백 WhatsApp은 다음 날 아침에 발송됩니다.",
+      "items": "품목",
+      "gold": "금",
+      "silver": "은",
+      "addLine": "품목 추가",
+      "removeLine": "품목 삭제",
+      "pdf": "송장 PDF (선택)",
+      "total": "송장 합계",
+      "cancel": "취소",
+      "save": "송장 저장",
+      "errorRequired": "송장 번호와 휴대폰은 필수입니다",
+      "errorSave": "송장을 저장할 수 없습니다",
+      "errorPdf": "송장은 저장되었지만 PDF 업로드에 실패했습니다",
+      "toastExists": "이미 존재하는 송장 번호입니다",
+      "toastCreated": "송장 저장됨 · +{points} 포인트"
+    },
+    "invoiceDetail": {
+      "back": "전체 송장",
+      "title": "송장 {number}",
+      "viewPdf": "PDF 보기",
+      "attachPdf": "PDF 첨부",
+      "replacePdf": "PDF 교체",
+      "redeem": "포인트 사용",
+      "total": "합계",
+      "taxDiscount": "GST {tax} · 할인 {discount}",
+      "pointsEarned": "적립 포인트",
+      "pointsRedeemed": "사용 포인트",
+      "source": "출처",
+      "items": {
+        "item": "품목",
+        "metal": "금속",
+        "weight": "순중량",
+        "rate": "구매 시 시세",
+        "making": "세공비",
+        "amount": "금액",
+        "none": "품목 없음"
+      },
+      "messagesTitle": "WhatsApp 후속 메시지",
+      "noMessages": "이 송장에 예약된 메시지가 없습니다",
+      "toastPdf": "PDF가 첨부되었습니다",
+      "errorPdf": "PDF 업로드 실패",
+      "confirmDelete": "이 송장을 삭제할까요? 포인트와 예약된 메시지도 함께 삭제됩니다.",
+      "toastDeleted": "송장이 삭제되었습니다",
+      "errorDelete": "송장을 삭제할 수 없습니다"
+    },
+    "redeem": {
+      "title": "포인트 사용",
+      "description": "오래된 포인트부터 사용됩니다. 각 포인트는 현재 가치로 계산됩니다.",
+      "available": "사용 가능: {points} 포인트 ({value} 상당)",
+      "bonusSplit": "{bonus}점은 개당 {bonusValue} · {base}점은 개당 {baseValue}",
+      "points": "사용할 포인트",
+      "all": "전체",
+      "note": "메모 (선택)",
+      "discount": "할인 금액: {value}",
+      "fifoNote": "보너스 시세 {bonus}점 + 기본 시세 {base}점",
+      "notEnough": "사용 가능한 포인트가 부족합니다",
+      "cancel": "취소",
+      "confirm": "사용",
+      "toastDone": "{points} 포인트를 {value}로 사용했습니다",
+      "errorLoad": "포인트를 불러올 수 없습니다",
+      "errorSave": "포인트 사용 실패"
+    },
+    "inventory": {
+      "title": "재고",
+      "subtitle": "금 · 은 품목, 중량 및 일일 금속 시세",
+      "import": "가져오기",
+      "add": "품목 추가",
+      "addTitle": "품목 추가",
+      "editTitle": "품목 수정",
+      "tabs": {
+        "gold": "금",
+        "silver": "은",
+        "rates": "금속 시세"
+      },
+      "gold": "금",
+      "silver": "은",
+      "status": {
+        "in_stock": "재고 있음",
+        "reserved": "예약됨",
+        "sold": "판매됨",
+        "all": "전체"
+      },
+      "making": {
+        "per_gram": "g당 (₹/g)",
+        "percent": "금속 가치 대비 %",
+        "fixed": "고정 (₹)"
+      },
+      "makingShort": {
+        "per_gram": "₹/g",
+        "percent": "%",
+        "fixed": "₹"
+      },
+      "netWeightAuto": "순중량 (g) — 비우면 총중량 − 스톤",
+      "inStockCount": "재고 수량",
+      "inStockWeight": "재고 순중량",
+      "searchPlaceholder": "태그, 이름 또는 카테고리 검색",
+      "empty": "품목이 없습니다",
+      "emptyHint": "품목을 하나씩 추가하거나 시트를 가져오세요.",
+      "table": {
+        "item": "품목",
+        "purity": "순도",
+        "gross": "총중량",
+        "net": "순중량",
+        "making": "세공비",
+        "priority": "우선순위",
+        "status": "상태"
+      },
+      "edit": "수정",
+      "delete": "삭제",
+      "confirmDelete": "{sku} 품목을 삭제할까요?",
+      "errorDelete": "품목을 삭제할 수 없습니다",
+      "cancel": "취소",
+      "save": "저장",
+      "toastSaved": "품목이 저장되었습니다",
+      "errorSave": "품목을 저장할 수 없습니다"
+    },
+    "rates": {
+      "todayTitle": "금속 시세",
+      "todayHint": "이 날짜의 청구에 사용되는 g당 시세입니다.",
+      "perGram": "g당 ₹",
+      "save": "시세 저장",
+      "date": "날짜",
+      "metal": "금속",
+      "rate": "시세",
+      "toastSaved": "시세가 저장되었습니다",
+      "errorSave": "시세를 저장할 수 없습니다",
+      "errorNone": "시세를 하나 이상 입력하세요"
+    },
+    "loyalty": {
+      "title": "로열티 및 고객 유지",
+      "subtitle": "포인트, 만료 알림, WhatsApp 생일 및 기념일 축하",
+      "importCustomers": "생일 가져오기",
+      "tabs": {
+        "overview": "개요",
+        "messages": "WhatsApp 기록",
+        "settings": "설정"
+      }
+    },
+    "overview": {
+      "activePoints": "유효 포인트",
+      "liability": "현재 가치",
+      "liabilityHint": "모든 유효 포인트의 현재 가치",
+      "expiring30": "30일 내 만료",
+      "customers": "포인트 보유 고객",
+      "expiringTitle": "향후 30일 내 만료되는 포인트",
+      "expiringNone": "곧 만료되는 포인트가 없습니다",
+      "from": "{date}부터",
+      "occasionsTitle": "이번 주 생일 및 기념일",
+      "occasionsNone": "향후 7일 내 없음",
+      "today": "오늘",
+      "inDays": "{days}일 후"
+    },
+    "messages": {
+      "allStatuses": "모든 상태",
+      "allKinds": "모든 메시지",
+      "empty": "아직 WhatsApp 메시지가 없습니다",
+      "emptyHint": "송장이 들어오면 피드백, 만료 알림, 축하 메시지가 여기에 표시됩니다.",
+      "table": {
+        "customer": "고객",
+        "message": "메시지",
+        "when": "시간",
+        "status": "상태"
+      },
+      "daysBefore": "{days}일 전",
+      "retry": "재시도",
+      "cancel": "취소",
+      "toastRetry": "다시 발송 대기열에 추가했습니다",
+      "toastCancel": "메시지가 취소되었습니다"
+    },
+    "messageKinds": {
+      "feedback": "감사 + 리뷰 + 송장",
+      "expiry_reminder": "포인트 만료 알림",
+      "birthday": "생일 축하",
+      "anniversary": "기념일 축하"
+    },
+    "messageStatus": {
+      "pending": "예약됨",
+      "sending": "발송 중",
+      "sent": "발송됨",
+      "skipped": "건너뜀",
+      "failed": "실패",
+      "cancelled": "취소됨"
+    },
+    "templateSlots": {
+      "feedback": "구매 감사 메시지 (송장 PDF 포함)",
+      "feedback_no_pdf": "구매 감사 메시지 (PDF 없음)",
+      "expiry_reminder": "포인트 만료 알림",
+      "birthday": "생일 축하",
+      "anniversary": "기념일 축하"
+    },
+    "settings": {
+      "notConfigured": "로열티가 아직 설정되지 않았습니다. 아래 설정을 확인하고 저장하면 켜집니다. WhatsApp “포인트” / “주문” 자동 답장은 처음 저장한 뒤부터 작동합니다.",
+      "enabled": "로열티 프로그램 사용",
+      "enabledHint": "송장에 포인트를 적립하고 자동 WhatsApp 메시지를 보냅니다.",
+      "storeName": "매장 이름 (답장에 표시)",
+      "reviewUrl": "Google 리뷰 링크",
+      "pointsTitle": "포인트 규칙",
+      "pointsSummary": "₹{amount}당 1포인트. {bonusMonths}개월 동안 ₹{bonus}, 이후 구매 후 {expiryMonths}개월까지 ₹{base}.",
+      "amountPerPoint": "포인트당 사용 금액 (₹)",
+      "bonusValue": "초기 포인트 가치 (₹)",
+      "bonusMonths": "…적용 개월 수",
+      "baseValue": "이후 포인트 가치 (₹)",
+      "expiryMonths": "포인트 만료 (개월)",
+      "reminderDays": "만료 알림 (며칠 전)",
+      "reminderDaysHint": "예: 30, 7, 1",
+      "birthdayPoints": "생일 보너스 포인트",
+      "anniversaryPoints": "기념일 보너스 포인트",
+      "sendHour": "메시지 발송 시각 (시)",
+      "sendHourHint": "0–23, {tz} 기준",
+      "templatesTitle": "WhatsApp 템플릿",
+      "templatesHint": "자동 메시지는 Meta 승인 템플릿으로 발송됩니다. 설정 → 템플릿에서 만든 뒤, 메시지별로 템플릿을 고르고 '{{1}}', '{{2}}'…에 들어갈 값을 순서대로 지정하세요.",
+      "tokens": "사용 가능한 값",
+      "noTemplate": "— 미설정 (발송 안 됨) —",
+      "variables": "'{{1}}', '{{2}}', … 값",
+      "feedbackHint": "DOCUMENT 헤더가 있는 템플릿을 사용하세요. 송장 PDF가 헤더에 첨부됩니다.",
+      "keywordsTitle": "WhatsApp 자동 답장",
+      "keywordsHint": "고객이 이 단어 중 하나가 포함된 짧은 메시지(최대 5단어)를 보내면 포인트 또는 구매 내역을 즉시 받습니다.",
+      "pointsKeywords": "포인트 잔액 키워드",
+      "ordersKeywords": "구매 내역 키워드",
+      "save": "설정 저장",
+      "toastSaved": "로열티 설정이 저장되었습니다",
+      "errorSave": "설정을 저장할 수 없습니다",
+      "errorLoad": "설정을 불러올 수 없습니다"
+    },
+    "customer": {
+      "birthday": "생일",
+      "anniversary": "기념일",
+      "customerCode": "고객 코드 (Vasy)",
+      "optOut": "자동 로열티 메시지 받지 않음",
+      "save": "저장",
+      "toastSaved": "저장되었습니다",
+      "errorCodeTaken": "다른 고객이 이미 이 코드를 사용 중입니다",
+      "errorLoad": "로열티 정보를 불러올 수 없습니다",
+      "active": "유효 포인트",
+      "worth": "{value} 상당",
+      "lifetime": "누적 적립",
+      "expired": "{points} 만료",
+      "bonusUntil": "{points}점은 {date}까지 개당 {value}",
+      "expiresOn": "{points}점이 {date}에 만료",
+      "redeem": "포인트 사용",
+      "adjustTitle": "보너스 포인트 추가",
+      "points": "포인트",
+      "reason": "사유",
+      "toastAdjusted": "포인트가 추가되었습니다",
+      "errorAdjust": "포인트를 추가할 수 없습니다",
+      "purchases": "구매 내역",
+      "noPurchases": "구매 내역이 없습니다",
+      "redemptions": "사용 내역"
     }
   }
 }

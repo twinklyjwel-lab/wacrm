@@ -5,8 +5,15 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import { ContactError } from '@/lib/api/v1/contacts'
-import { InvoiceInputError, ingestInvoice, validateInvoiceInput } from './invoices'
+import { ContactError, findOrCreateContact } from '@/lib/api/v1/contacts'
+import {
+  InvoiceInputError,
+  ingestInvoice,
+  normalizeIndianPhone,
+  parseFlexibleDate,
+  updateCustomerProfile,
+  validateInvoiceInput,
+} from './invoices'
 import { getLoyaltySettings } from './service'
 import type { Metal } from './types'
 
@@ -266,6 +273,52 @@ export async function upsertMetalRates(
       for (const row of data ?? []) {
         results.push({ key: `${row.metal} ${row.purity}`, ok: true, id: row.id as string })
       }
+    }
+  }
+  return results
+}
+
+// ---- Customers (birthday / anniversary import) ---------------
+
+/** Find-or-create customers by phone and set their special dates. */
+export async function upsertCustomersBatch(
+  db: SupabaseClient,
+  accountId: string,
+  auditUserId: string,
+  raws: unknown[],
+): Promise<RowResult[]> {
+  const results: RowResult[] = []
+  for (const raw of raws) {
+    const r = (raw ?? {}) as Record<string, unknown>
+    const phone = normalizeIndianPhone(String(r.phone ?? ''))
+    try {
+      if (!/^\+[1-9]\d{6,14}$/.test(phone)) throw new InvoiceInputError('phone is missing or invalid')
+      const birthday = parseFlexibleDate(r.birthday)
+      const anniversary = parseFlexibleDate(r.anniversary)
+      if (r.birthday && !birthday) throw new InvoiceInputError('birthday is not a valid date')
+      if (r.anniversary && !anniversary) throw new InvoiceInputError('anniversary is not a valid date')
+      const name = s(r.name)
+      const contact = await findOrCreateContact(db, accountId, auditUserId, {
+        phone,
+        name,
+        email: s(r.email),
+      })
+      if (!contact.created && name) {
+        await db.from('contacts').update({ name }).eq('id', contact.id).eq('account_id', accountId)
+      }
+      await updateCustomerProfile(db, accountId, contact.id, {
+        phone,
+        name,
+        email: s(r.email),
+        customer_code: s(r.customer_code),
+        birthday,
+        anniversary,
+      })
+      results.push({ key: phone, ok: true, id: contact.id })
+    } catch (err) {
+      const known = err instanceof InvoiceInputError || err instanceof ContactError
+      if (!known) console.error('[loyalty] customer import failed:', err)
+      results.push({ key: phone || null, ok: false, error: known ? (err as Error).message : 'Failed to save customer' })
     }
   }
   return results
