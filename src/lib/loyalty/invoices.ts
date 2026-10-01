@@ -378,7 +378,7 @@ export async function ingestInvoice(
       total: invoice.total,
       notes: invoice.notes,
     })
-    .select('id, contact_id, external_id, invoice_date, total')
+    .select('id, contact_id, external_id, invoice_date, total, tax')
     .single();
   if (insErr || !inserted) {
     if ((insErr as { code?: string } | null)?.code === '23505') {
@@ -451,6 +451,7 @@ export async function ingestInvoice(
       external_id: invoice.external_id,
       invoice_date: inserted.invoice_date as string,
       total: Number(inserted.total),
+      tax: Number(inserted.tax),
     },
     settings,
     now

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   feedbackSendAt,
+  invoicePointsBase,
   lotDates,
   lotRate,
   planRedemption,
@@ -42,6 +43,21 @@ describe('pointsForAmount', () => {
     expect(pointsForAmount(0.1 + 0.2 + 299.7, settings)).toBe(3);
     expect(pointsForAmount(-500, settings)).toBe(0);
     expect(pointsForAmount(Number.NaN, settings)).toBe(0);
+  });
+});
+
+describe('invoicePointsBase', () => {
+  it('excludes GST but keeps making charges', () => {
+    // gold 60,000 + making 4,500 + GST 1,935 = 66,435 → 645 points
+    expect(invoicePointsBase(66_435, 1_935)).toBe(64_500);
+    expect(pointsForAmount(invoicePointsBase(66_435, 1_935), settings)).toBe(
+      645
+    );
+  });
+  it('never goes negative and ignores bad tax', () => {
+    expect(invoicePointsBase(100, 500)).toBe(0);
+    expect(invoicePointsBase(1000, Number.NaN)).toBe(1000);
+    expect(invoicePointsBase(1000, -50)).toBe(1000);
   });
 });
 

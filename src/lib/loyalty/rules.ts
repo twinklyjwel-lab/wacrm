@@ -32,6 +32,16 @@ export function pointsForAmount(
   );
 }
 
+/**
+ * The amount an invoice earns points on: the total excluding GST.
+ * Making charges count; discounts are already netted into the total.
+ */
+export function invoicePointsBase(total: number, tax: number): number {
+  const t = Number.isFinite(total) ? total : 0;
+  const g = Number.isFinite(tax) && tax > 0 ? tax : 0;
+  return Math.max(0, Math.round((t - g) * 100) / 100);
+}
+
 export function lotDates(
   earnedAt: Date,
   settings: Pick<LoyaltySettings, 'bonus_months' | 'expiry_months' | 'timezone'>

@@ -9,6 +9,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatLocalDate, localDate } from './dates';
 import {
   feedbackSendAt,
+  invoicePointsBase,
   lotDates,
   pointsForAmount,
   reminderSendTimes,
@@ -207,6 +208,8 @@ export interface InvoiceForCredit {
   external_id: string;
   invoice_date: string;
   total: number;
+  /** GST / tax on the invoice — excluded from the points base. */
+  tax: number;
 }
 
 /**
@@ -223,7 +226,10 @@ export async function creditInvoice(
 ): Promise<{ points: number; lot: LoyaltyLot | null }> {
   const invoiceDate = new Date(invoice.invoice_date);
   const points = settings.enabled
-    ? pointsForAmount(Number(invoice.total), settings)
+    ? pointsForAmount(
+        invoicePointsBase(Number(invoice.total), Number(invoice.tax)),
+        settings
+      )
     : 0;
   let lot: LoyaltyLot | null = null;
   if (points > 0) {

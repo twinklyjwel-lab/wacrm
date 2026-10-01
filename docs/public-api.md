@@ -274,7 +274,8 @@ Push one invoice, or `{ "invoices": [ ... ] }` (up to 200). Scope:
 a repeat returns `created: false` and changes nothing. Each new invoice
 finds or creates the customer by phone (10-digit numbers get `+91`),
 stores the lines with the metal rate per gram at purchase, marks
-matching inventory tags as sold, credits loyalty points and queues the
+matching inventory tags as sold, credits loyalty points (on the total
+excluding GST) and queues the
 next-morning feedback WhatsApp. `pdf_base64` (optional) attaches the
 invoice PDF. Full field list and examples: [loyalty.md](./loyalty.md).
 
@@ -293,7 +294,7 @@ invoice PDF. Full field list and examples: [loyalty.md](./loyalty.md).
 ```
 
 Response `200` — one result per invoice:
-`{ "data": { "results": [{ "external_id": "INV-1024", "ok": true, "created": true, "invoice_id": "…", "contact_id": "…", "points_earned": 645 }] } }`.
+`{ "data": { "results": [{ "external_id": "INV-1024", "ok": true, "created": true, "invoice_id": "…", "contact_id": "…", "points_earned": 626 }] } }`.
 Invalid invoices come back as `{ "ok": false, "error": "…" }` without
 failing the rest of the batch.
 

@@ -10,7 +10,8 @@ jewellery business that bills in **Vasy ERP**:
   stone and net weight, making charge, priority and status, plus
   **daily metal rates**.
 - **Loyalty points**:
-  - **Earning:** 1 point per ₹100 of the invoice total.
+  - **Earning:** 1 point per ₹100 of the invoice total **excluding GST**
+    (making charges count).
   - **Value:** each point is worth **₹1.5 for the first month**, then
     **₹1** until it **expires 3 months after the purchase**.
   - **Redemption:** the oldest points are used first.
@@ -21,7 +22,7 @@ jewellery business that bills in **Vasy ERP**:
   | ----------------------------------------- | ------------------------------------------------------------------------ |
   | Next morning after a purchase (10:00 IST) | Thank-you + Google review link + points earned, **invoice PDF attached** |
   | 30, 7 and 1 days before points expire     | Points-expiry reminder; skipped if the points were already used          |
-  | On the birthday / anniversary (10:00 IST) | Wish + bonus points + invitation to collect a surprise gift              |
+  | On the birthday / anniversary (10:00 IST) | Wish + invitation to collect a surprise gift (bonus points optional)     |
 
 - **WhatsApp self-service**: a customer who texts `points` / `loyalty`
   / `balance` gets their lifetime points, active points and their ₹
@@ -87,8 +88,9 @@ importing. These headers are recognised:
 Other details:
 
 - **Phone numbers:** 10-digit numbers get `+91`.
-- **Points:** credited on the invoice **Total**. Without a total
-  column, it is worked out as lines − discount + GST.
+- **Points:** credited on the invoice **Total minus GST** (making
+  charges count). Map your GST column so it can be left out. Without a
+  total column, the total is worked out as lines − discount + GST.
 - **Re-importing:** importing the same file again is safe. Invoices
   that already exist are skipped.
 - **Old invoices:** the feedback WhatsApp is only queued for invoices
@@ -147,15 +149,18 @@ PDF attached.
 > Hi {{1}}, a reminder that {{2}} of your loyalty points expire on {{3}}.
 > Your points are worth {{4}} today — visit us to redeem them before they expire! ✨
 
-**Birthday wish**: _Marketing_. Values: `name, bonus_points`.
+**Birthday wish**: _Marketing_. Values: `name`.
 
-> Happy Birthday {{1}}! 🎂 We've added {{2}} bonus points to your account,
-> and a surprise gift is waiting for you at the store. Visit us to collect it! 🎁
+> Happy Birthday {{1}}! 🎂 A surprise gift is waiting for you at the store.
+> Visit us to collect it! 🎁
 
-**Anniversary wish**: _Marketing_. Values: `name, bonus_points`.
+**Anniversary wish**: _Marketing_. Values: `name`.
 
-> Happy Anniversary {{1}}! 💍 Celebrate with {{2}} bonus points and a surprise gift
-> waiting for you at the store. 🎁
+> Happy Anniversary {{1}}! 💍 A surprise gift is waiting for you at the store
+> to celebrate your special day. 🎁
+
+Birthday / anniversary bonus points are off (0). To give points later,
+set them in Loyalty → Settings and add `bonus_points` to the template.
 
 ## 4. Day to day
 

@@ -66,8 +66,8 @@ export const DEFAULT_TEMPLATE_PARAMS: Record<TemplateSlot, TemplateToken[]> = {
   feedback: ['name', 'points_earned', 'active_points', 'review_url'],
   feedback_no_pdf: ['name', 'points_earned', 'active_points', 'review_url'],
   expiry_reminder: ['name', 'expiring_points', 'expiry_date', 'active_value'],
-  birthday: ['name', 'bonus_points'],
-  anniversary: ['name', 'bonus_points'],
+  birthday: ['name'],
+  anniversary: ['name'],
 };
 
 export interface LoyaltySettings {
