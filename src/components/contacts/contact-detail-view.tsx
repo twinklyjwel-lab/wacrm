@@ -41,6 +41,7 @@ import {
   LayoutTemplate,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { CustomerLoyaltyPanel } from '@/components/jewellery/customer-loyalty-panel';
 
 interface ContactDetailViewProps {
   open: boolean;
@@ -482,6 +483,12 @@ export function ContactDetailView({
                 >
                   {t('tabs.deals')}
                 </TabsTrigger>
+                <TabsTrigger
+                  value="loyalty"
+                  className="data-active:bg-muted data-active:text-primary text-muted-foreground"
+                >
+                  {t('tabs.loyalty')}
+                </TabsTrigger>
               </TabsList>
 
               {/* Details Tab */}
@@ -743,6 +750,11 @@ export function ContactDetailView({
                     ))}
                   </div>
                 )}
+              </TabsContent>
+
+              {/* Loyalty Tab */}
+              <TabsContent value="loyalty" className="flex-1 overflow-y-auto px-4 py-3">
+                {contactId && <CustomerLoyaltyPanel contactId={contactId} />}
               </TabsContent>
             </Tabs>
           </div>

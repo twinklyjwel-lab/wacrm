@@ -50,6 +50,12 @@ clone or fork it to run your own CRM.
 - **Public REST API** (`/api/v1`) with scoped, revocable API keys —
   build your own automations on top of your CRM. See
   [docs/public-api.md](./docs/public-api.md).
+- **Jewellery store layer** — invoices from Vasy ERP (CSV / Excel /
+  API) with gold & silver rates at purchase, article-level inventory,
+  loyalty points with tiered value + expiry, and automatic WhatsApp
+  retention (feedback with invoice PDF, expiry reminders, birthday /
+  anniversary wishes, "points" / "orders" self-service). See
+  [docs/loyalty.md](docs/loyalty.md).
 - **MCP server** — drive your CRM from Claude, Cursor, and other AI
   assistants over the [Model Context Protocol](https://modelcontextprotocol.io).
   Read-only by default, opt-in writes. See [docs/mcp.md](./docs/mcp.md)

@@ -176,4 +176,49 @@ export class WacrmClient {
   getBroadcast(id: string): Promise<{ data: unknown }> {
     return this.request('GET', `/broadcasts/${encodeURIComponent(id)}`);
   }
+
+  // --- Jewellery: invoices, loyalty, inventory, metal rates ----------
+
+  listInvoices(query: {
+    limit?: number;
+    cursor?: string;
+    contact_id?: string;
+    external_id?: string;
+  }): Promise<Paginated<unknown>> {
+    return this.list('/invoices', query);
+  }
+
+  pushInvoices(invoices: unknown[]): Promise<{ data: unknown }> {
+    return this.request('POST', '/invoices', { body: { invoices } });
+  }
+
+  getContactLoyalty(id: string): Promise<{ data: unknown }> {
+    return this.request('GET', `/contacts/${encodeURIComponent(id)}/loyalty`);
+  }
+
+  redeemPoints(id: string, body: unknown): Promise<{ data: unknown }> {
+    return this.request('POST', `/contacts/${encodeURIComponent(id)}/loyalty/redeem`, { body });
+  }
+
+  listInventory(query: {
+    limit?: number;
+    cursor?: string;
+    metal?: string;
+    status?: string;
+    search?: string;
+  }): Promise<Paginated<unknown>> {
+    return this.list('/inventory', query);
+  }
+
+  upsertInventory(items: unknown[]): Promise<{ data: unknown }> {
+    return this.request('POST', '/inventory', { body: { items } });
+  }
+
+  getMetalRates(): Promise<{ data: unknown }> {
+    return this.request('GET', '/metal-rates');
+  }
+
+  setMetalRates(rates: unknown[]): Promise<{ data: unknown }> {
+    return this.request('POST', '/metal-rates', { body: { rates } });
+  }
 }
