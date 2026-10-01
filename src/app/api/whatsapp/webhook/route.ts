@@ -9,6 +9,7 @@ import { verifyMetaWebhookSignature } from '@/lib/whatsapp/webhook-signature'
 import { runAutomationsForTrigger } from '@/lib/automations/engine'
 import { dispatchInboundToFlows } from '@/lib/flows/engine'
 import { dispatchInboundToAiReply } from '@/lib/ai/auto-reply'
+import { dispatchInboundToLoyalty } from '@/lib/loyalty/responder'
 import { dispatchWebhookEvent } from '@/lib/webhooks/deliver'
 import {
   handleTemplateWebhookChange,
@@ -753,7 +754,20 @@ async function processMessage(
           },
     isFirstInboundMessage,
   })
-  const flowConsumed = flowResult.consumed
+  // Loyalty self-service ("points" / "orders" → balance or purchase
+  // history). Runs only for plain text a flow didn't take; when it
+  // replies, the message counts as consumed so keyword automations and
+  // the AI auto-reply don't answer a second time. Never throws.
+  const loyaltyResult =
+    !flowResult.consumed && !interactiveReplyId && message.type === 'text'
+      ? await dispatchInboundToLoyalty({
+          accountId,
+          contactId: contactRecord.id,
+          conversationId: conversation.id,
+          text: contentText ?? message.text?.body ?? '',
+        })
+      : { consumed: false }
+  const flowConsumed = flowResult.consumed || loyaltyResult.consumed
 
   // Fire any automations that react to this webhook event. All dispatches
   // run here (not earlier) so the contact, conversation, and inbound
