@@ -50,6 +50,10 @@ it. Grant the minimum.
 | `conversations:read` | List and read conversations              |
 | `broadcasts:send`    | Launch broadcast campaigns               |
 | `webhooks:manage`    | Register and manage outbound webhooks    |
+| `invoices:read`      | List invoices                            |
+| `invoices:write`     | Push invoices (credits loyalty points)   |
+| `inventory:write`    | Upsert inventory items and metal rates   |
+| `loyalty:read`       | Read a customer's loyalty points         |
 
 A key with **no scopes** still authenticates and can call
 `GET /api/v1/me` — useful for verifying a key works.
@@ -262,6 +266,62 @@ Invalid phone numbers are dropped and counted as `rejected`. Response
 Broadcast status + counts. Scope: `broadcasts:send`. `status` moves
 `sending` → `sent`; `delivered_count` / `read_count` keep climbing as
 Meta delivery webhooks arrive. `404` for another account's broadcast.
+
+### `POST /api/v1/invoices`
+
+Push one invoice, or `{ "invoices": [ ... ] }` (up to 200). Scope:
+`invoices:write`. Idempotent on `external_id` (the ERP invoice number):
+a repeat returns `created: false` and changes nothing. Each new invoice
+finds or creates the customer by phone (10-digit numbers get `+91`),
+stores the lines with the metal rate per gram at purchase, marks
+matching inventory tags as sold, credits loyalty points and queues the
+next-morning feedback WhatsApp. `pdf_base64` (optional) attaches the
+invoice PDF. Full field list and examples: [loyalty.md](./loyalty.md).
+
+```json
+{
+  "external_id": "INV-1024",
+  "invoice_date": "2026-10-01",
+  "customer": { "phone": "9876543210", "name": "Priya Sharma", "birthday": "12/08/1992" },
+  "items": [
+    { "sku": "G-22-0412", "description": "Gold chain", "metal": "gold", "purity": "22K",
+      "net_weight": 8.25, "metal_rate_per_gram": 7050, "making_charge": 4500, "amount": 62662.5 }
+  ],
+  "tax": 1879.88,
+  "total": 64542.38
+}
+```
+
+Response `200` — one result per invoice:
+`{ "data": { "results": [{ "external_id": "INV-1024", "ok": true, "created": true, "invoice_id": "…", "contact_id": "…", "points_earned": 645 }] } }`.
+Invalid invoices come back as `{ "ok": false, "error": "…" }` without
+failing the rest of the batch.
+
+### `GET /api/v1/invoices`
+
+List invoices with their lines, newest first. Scope: `invoices:read`.
+Filters: `?contact_id=`, `?external_id=`. Cursor-paginated.
+
+### `POST /api/v1/inventory`
+
+Upsert articles by `sku` (tag number): one item or `{ "items": [...] }`.
+Scope: `inventory:write`. Fields: `sku`, `name`, `category`, `metal`
+(`gold` / `silver`), `purity`, `gross_weight`, `stone_weight`,
+`net_weight` (defaults to gross − stone), `making_charge_type`
+(`per_gram` / `percent` / `fixed`), `making_charge`, `priority`,
+`status` (`in_stock` / `reserved` / `sold`), `notes`.
+
+### `POST /api/v1/metal-rates`
+
+Set rates per gram: one rate or `{ "rates": [...] }`, each
+`{ "metal": "gold", "purity": "22K", "rate_per_gram": 7050, "effective_date": "2026-10-01" }`
+(`effective_date` defaults to today, store time). Scope: `inventory:write`.
+
+### `GET /api/v1/contacts/{id}/loyalty`
+
+A customer's points: `lifetime_earned`, `active_points`, `active_value`
+(₹ today), `bonus_points`, `expired_points`, upcoming `expiring` dates
+and `bonus_ending`. Scope: `loyalty:read`.
 
 ## Pagination
 

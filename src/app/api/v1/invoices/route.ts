@@ -13,7 +13,11 @@
 
 import { requireApiKey } from '@/lib/auth/api-context';
 import { ok, okList, fail, toApiErrorResponse } from '@/lib/api/v1/respond';
-import { parseListParams, keysetFilter, buildPage } from '@/lib/api/v1/pagination';
+import {
+  parseListParams,
+  keysetFilter,
+  buildPage,
+} from '@/lib/api/v1/pagination';
 import { resolveAuditUserId } from '@/lib/api/v1/contacts';
 import { ingestInvoiceBatch, MAX_BATCH } from '@/lib/loyalty/batch';
 
@@ -66,11 +70,16 @@ export async function POST(request: Request) {
       return fail('bad_request', 'Request body must be a JSON object', 400);
     }
     const list = Array.isArray((body as { invoices?: unknown }).invoices)
-      ? ((body as { invoices: unknown[] }).invoices)
+      ? (body as { invoices: unknown[] }).invoices
       : [body];
-    if (list.length === 0) return fail('bad_request', "'invoices' is empty", 400);
+    if (list.length === 0)
+      return fail('bad_request', "'invoices' is empty", 400);
     if (list.length > MAX_BATCH) {
-      return fail('bad_request', `At most ${MAX_BATCH} invoices per request`, 400);
+      return fail(
+        'bad_request',
+        `At most ${MAX_BATCH} invoices per request`,
+        400
+      );
     }
     const auditUserId = await resolveAuditUserId(ctx.supabase, ctx.accountId);
     const results = await ingestInvoiceBatch(

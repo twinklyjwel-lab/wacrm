@@ -50,13 +50,18 @@ export function RedeemDialog({
     setNote('');
     fetchJson<LoyaltyCardData>(`/api/loyalty/contacts/${contactId}`)
       .then(setData)
-      .catch((err) => toast.error(err instanceof Error ? err.message : t('errorLoad')));
+      .catch((err) =>
+        toast.error(err instanceof Error ? err.message : t('errorLoad'))
+      );
   }, [open, contactId, t]);
 
   const n = Number(points);
   const plan = useMemo(
-    () => (data && Number.isInteger(n) && n > 0 ? planRedemption(data.lots, n, new Date(), data.settings) : null),
-    [data, n],
+    () =>
+      data && Number.isInteger(n) && n > 0
+        ? planRedemption(data.lots, n, new Date(), data.settings)
+        : null,
+    [data, n]
   );
 
   async function submit() {
@@ -65,9 +70,16 @@ export function RedeemDialog({
     try {
       await fetchJson('/api/loyalty/redeem', {
         method: 'POST',
-        body: JSON.stringify({ contact_id: contactId, points: n, invoice_id: invoiceId ?? null, note: note || null }),
+        body: JSON.stringify({
+          contact_id: contactId,
+          points: n,
+          invoice_id: invoiceId ?? null,
+          note: note || null,
+        }),
       });
-      toast.success(t('toastDone', { points: ptsFmt(n), value: inrFmt(plan.value) }));
+      toast.success(
+        t('toastDone', { points: ptsFmt(n), value: inrFmt(plan.value) })
+      );
       onOpenChange(false);
       onDone();
     } catch (err) {
@@ -77,8 +89,14 @@ export function RedeemDialog({
     }
   }
 
-  const bonusPts = plan?.draws.filter((d) => d.rate === data?.settings.bonus_value && d.rate !== data?.settings.base_value)
-    .reduce((s, d) => s + d.points, 0) ?? 0;
+  const bonusPts =
+    plan?.draws
+      .filter(
+        (d) =>
+          d.rate === data?.settings.bonus_value &&
+          d.rate !== data?.settings.base_value
+      )
+      .reduce((s, d) => s + d.points, 0) ?? 0;
 
   return (
     <Dialog open={open} onOpenChange={(o) => !saving && onOpenChange(o)}>
@@ -89,16 +107,19 @@ export function RedeemDialog({
         </DialogHeader>
         {!data ? (
           <div className="flex h-24 items-center justify-center">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <Loader2 className="text-primary h-5 w-5 animate-spin" />
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="rounded-lg bg-muted/50 p-3 text-sm">
+            <div className="bg-muted/50 rounded-lg p-3 text-sm">
               <p className="text-foreground">
-                {t('available', { points: ptsFmt(data.summary.activePoints), value: inrFmt(data.summary.activeValue) })}
+                {t('available', {
+                  points: ptsFmt(data.summary.activePoints),
+                  value: inrFmt(data.summary.activeValue),
+                })}
               </p>
               {data.summary.bonusPoints > 0 && (
-                <p className="mt-0.5 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-0.5 text-xs">
                   {t('bonusSplit', {
                     bonus: ptsFmt(data.summary.bonusPoints),
                     bonusValue: inrFmt(data.settings.bonus_value),
@@ -111,23 +132,39 @@ export function RedeemDialog({
             <div className="space-y-1.5">
               <Label>{t('points')}</Label>
               <div className="flex gap-2">
-                <Input inputMode="numeric" value={points} onChange={(e) => setPoints(e.target.value.replace(/\D/g, ''))} />
-                <Button variant="outline" onClick={() => setPoints(String(data.summary.activePoints))}>
+                <Input
+                  inputMode="numeric"
+                  value={points}
+                  onChange={(e) => setPoints(e.target.value.replace(/\D/g, ''))}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => setPoints(String(data.summary.activePoints))}
+                >
                   {t('all')}
                 </Button>
               </div>
             </div>
             <div className="space-y-1.5">
               <Label>{t('note')}</Label>
-              <Input value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} />
+              <Input
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                maxLength={500}
+              />
             </div>
             {points && (
-              <div className="rounded-lg border border-border p-3 text-sm">
+              <div className="border-border rounded-lg border p-3 text-sm">
                 {plan ? (
                   <>
-                    <p className="font-medium text-foreground">{t('discount', { value: inrFmt(plan.value) })}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {t('fifoNote', { bonus: ptsFmt(bonusPts), base: ptsFmt(n - bonusPts) })}
+                    <p className="text-foreground font-medium">
+                      {t('discount', { value: inrFmt(plan.value) })}
+                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-xs">
+                      {t('fifoNote', {
+                        bonus: ptsFmt(bonusPts),
+                        base: ptsFmt(n - bonusPts),
+                      })}
                     </p>
                   </>
                 ) : (
@@ -138,10 +175,18 @@ export function RedeemDialog({
           </div>
         )}
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={saving}
+          >
             {t('cancel')}
           </Button>
-          <Button onClick={submit} disabled={!plan || saving} className="bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button
+            onClick={submit}
+            disabled={!plan || saving}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             {t('confirm')}
           </Button>

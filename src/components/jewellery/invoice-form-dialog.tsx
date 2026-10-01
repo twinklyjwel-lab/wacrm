@@ -40,7 +40,9 @@ const emptyLine = (): Line => ({
 });
 
 function todayIst(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(
+    new Date()
+  );
 }
 
 const num = (s: string) => (s.trim() === '' ? 0 : Number(s));
@@ -66,7 +68,10 @@ export function InvoiceFormDialog({
   const [pdf, setPdf] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const subtotal = useMemo(() => lines.reduce((s, l) => s + num(l.amount), 0), [lines]);
+  const subtotal = useMemo(
+    () => lines.reduce((s, l) => s + num(l.amount), 0),
+    [lines]
+  );
   const total = Math.max(0, subtotal - num(discount) + num(tax));
 
   function setLine(i: number, patch: Partial<Line>) {
@@ -75,14 +80,21 @@ export function InvoiceFormDialog({
         if (idx !== i) return l;
         const next = { ...l, ...patch };
         // Auto-fill amount from weight × rate + making when not typed by hand.
-        const autoKeys: (keyof Line)[] = ['net_weight', 'metal_rate_per_gram', 'making_charge'];
-        if (Object.keys(patch).some((k) => autoKeys.includes(k as keyof Line))) {
+        const autoKeys: (keyof Line)[] = [
+          'net_weight',
+          'metal_rate_per_gram',
+          'making_charge',
+        ];
+        if (
+          Object.keys(patch).some((k) => autoKeys.includes(k as keyof Line))
+        ) {
           const w = num(next.net_weight);
           const r = num(next.metal_rate_per_gram);
-          if (w > 0 && r > 0) next.amount = (w * r + num(next.making_charge)).toFixed(2);
+          if (w > 0 && r > 0)
+            next.amount = (w * r + num(next.making_charge)).toFixed(2);
         }
         return next;
-      }),
+      })
     );
   }
 
@@ -125,8 +137,17 @@ export function InvoiceFormDialog({
         total,
       };
       const { results } = await fetchJson<{
-        results: { ok: boolean; error?: string; created?: boolean; invoice_id?: string; points_earned?: number }[];
-      }>('/api/invoices', { method: 'POST', body: JSON.stringify({ invoices: [invoice], source: 'manual' }) });
+        results: {
+          ok: boolean;
+          error?: string;
+          created?: boolean;
+          invoice_id?: string;
+          points_earned?: number;
+        }[];
+      }>('/api/invoices', {
+        method: 'POST',
+        body: JSON.stringify({ invoices: [invoice], source: 'manual' }),
+      });
       const r = results[0];
       if (!r?.ok || !r.invoice_id) throw new Error(r?.error ?? t('errorSave'));
       if (r.created === false) {
@@ -135,8 +156,11 @@ export function InvoiceFormDialog({
         if (pdf) {
           const form = new FormData();
           form.append('file', pdf);
-          await fetchJson(`/api/invoices/${r.invoice_id}/pdf`, { method: 'POST', body: form }).catch((err) =>
-            toast.error(err instanceof Error ? err.message : t('errorPdf')),
+          await fetchJson(`/api/invoices/${r.invoice_id}/pdf`, {
+            method: 'POST',
+            body: form,
+          }).catch((err) =>
+            toast.error(err instanceof Error ? err.message : t('errorPdf'))
           );
         }
         toast.success(t('toastCreated', { points: r.points_earned ?? 0 }));
@@ -162,15 +186,28 @@ export function InvoiceFormDialog({
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>{tf('external_id')} *</Label>
-            <Input value={externalId} onChange={(e) => setExternalId(e.target.value)} placeholder="INV-1024" />
+            <Input
+              value={externalId}
+              onChange={(e) => setExternalId(e.target.value)}
+              placeholder="INV-1024"
+            />
           </div>
           <div className="space-y-1.5">
             <Label>{tf('invoice_date')}</Label>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>{tf('phone')} *</Label>
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="98765 43210" inputMode="tel" />
+            <Input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="98765 43210"
+              inputMode="tel"
+            />
           </div>
           <div className="space-y-1.5">
             <Label>{tf('name')}</Label>
@@ -179,21 +216,35 @@ export function InvoiceFormDialog({
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-medium text-foreground">{t('items')}</p>
+          <p className="text-foreground text-sm font-medium">{t('items')}</p>
           {lines.map((l, i) => (
-            <div key={i} className="grid grid-cols-2 gap-2 rounded-lg border border-border p-2 sm:grid-cols-8">
+            <div
+              key={i}
+              className="border-border grid grid-cols-2 gap-2 rounded-lg border p-2 sm:grid-cols-8"
+            >
               <Input
                 className="col-span-2"
                 placeholder={tf('description')}
                 value={l.description}
                 onChange={(e) => setLine(i, { description: e.target.value })}
               />
-              <Input placeholder={tf('sku')} value={l.sku} onChange={(e) => setLine(i, { sku: e.target.value })} />
-              <NativeSelect value={l.metal} onChange={(e) => setLine(i, { metal: e.target.value })}>
+              <Input
+                placeholder={tf('sku')}
+                value={l.sku}
+                onChange={(e) => setLine(i, { sku: e.target.value })}
+              />
+              <NativeSelect
+                value={l.metal}
+                onChange={(e) => setLine(i, { metal: e.target.value })}
+              >
                 <option value="gold">{t('gold')}</option>
                 <option value="silver">{t('silver')}</option>
               </NativeSelect>
-              <Input placeholder={tf('purity')} value={l.purity} onChange={(e) => setLine(i, { purity: e.target.value })} />
+              <Input
+                placeholder={tf('purity')}
+                value={l.purity}
+                onChange={(e) => setLine(i, { purity: e.target.value })}
+              />
               <Input
                 placeholder={tf('net_weight')}
                 inputMode="decimal"
@@ -204,7 +255,9 @@ export function InvoiceFormDialog({
                 placeholder={tf('metal_rate_per_gram')}
                 inputMode="decimal"
                 value={l.metal_rate_per_gram}
-                onChange={(e) => setLine(i, { metal_rate_per_gram: e.target.value })}
+                onChange={(e) =>
+                  setLine(i, { metal_rate_per_gram: e.target.value })
+                }
               />
               <Input
                 placeholder={tf('making_charge')}
@@ -224,7 +277,9 @@ export function InvoiceFormDialog({
                   variant="ghost"
                   size="sm"
                   disabled={lines.length === 1}
-                  onClick={() => setLines((ls) => ls.filter((_, idx) => idx !== i))}
+                  onClick={() =>
+                    setLines((ls) => ls.filter((_, idx) => idx !== i))
+                  }
                   aria-label={t('removeLine')}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -232,7 +287,11 @@ export function InvoiceFormDialog({
               </div>
             </div>
           ))}
-          <Button variant="outline" size="sm" onClick={() => setLines((ls) => [...ls, emptyLine()])}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLines((ls) => [...ls, emptyLine()])}
+          >
             <Plus className="h-4 w-4" />
             {t('addLine')}
           </Button>
@@ -241,28 +300,50 @@ export function InvoiceFormDialog({
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="space-y-1.5">
             <Label>{tf('discount')}</Label>
-            <Input inputMode="decimal" value={discount} onChange={(e) => setDiscount(e.target.value)} />
+            <Input
+              inputMode="decimal"
+              value={discount}
+              onChange={(e) => setDiscount(e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>{tf('tax')}</Label>
-            <Input inputMode="decimal" value={tax} onChange={(e) => setTax(e.target.value)} />
+            <Input
+              inputMode="decimal"
+              value={tax}
+              onChange={(e) => setTax(e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>{t('pdf')}</Label>
-            <Input type="file" accept="application/pdf" onChange={(e) => setPdf(e.target.files?.[0] ?? null)} />
+            <Input
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => setPdf(e.target.files?.[0] ?? null)}
+            />
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2 text-sm">
+        <div className="bg-muted/50 flex items-center justify-between rounded-lg px-3 py-2 text-sm">
           <span className="text-muted-foreground">{t('total')}</span>
-          <span className="font-semibold text-foreground tabular-nums">{inrFmt(total)}</span>
+          <span className="text-foreground font-semibold tabular-nums">
+            {inrFmt(total)}
+          </span>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={saving}
+          >
             {t('cancel')}
           </Button>
-          <Button onClick={save} disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button
+            onClick={save}
+            disabled={saving}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             {t('save')}
           </Button>

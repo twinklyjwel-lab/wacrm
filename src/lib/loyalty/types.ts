@@ -3,26 +3,22 @@
 // Mirrors supabase/migrations/037_jewellery_loyalty.sql.
 // ============================================================
 
-export type Metal = 'gold' | 'silver'
-export const METALS: Metal[] = ['gold', 'silver']
+export type Metal = 'gold' | 'silver';
+export const METALS: Metal[] = ['gold', 'silver'];
 
-export type LotSource = 'purchase' | 'birthday' | 'anniversary' | 'manual'
+export type LotSource = 'purchase' | 'birthday' | 'anniversary' | 'manual';
 
-export type ScheduledKind = 'feedback' | 'expiry_reminder' | 'birthday' | 'anniversary'
+export type ScheduledKind =
+  'feedback' | 'expiry_reminder' | 'birthday' | 'anniversary';
 export const SCHEDULED_KINDS: ScheduledKind[] = [
   'feedback',
   'expiry_reminder',
   'birthday',
   'anniversary',
-]
+];
 
 export type ScheduledStatus =
-  | 'pending'
-  | 'sending'
-  | 'sent'
-  | 'skipped'
-  | 'failed'
-  | 'cancelled'
+  'pending' | 'sending' | 'sent' | 'skipped' | 'failed' | 'cancelled';
 
 /**
  * Values that can be substituted into a WhatsApp template's body
@@ -44,27 +40,27 @@ export const TEMPLATE_TOKENS = [
   'expiry_date',
   'days_left',
   'bonus_points',
-] as const
-export type TemplateToken = (typeof TEMPLATE_TOKENS)[number]
+] as const;
+export type TemplateToken = (typeof TEMPLATE_TOKENS)[number];
 
 export interface TemplateConfig {
   /** Template name as synced from Meta (message_templates.name). */
-  name: string
+  name: string;
   /** Template language code (message_templates.language). */
-  language: string
+  language: string;
   /** Token for each body variable, in order: params[0] → {{1}}. */
-  params: TemplateToken[]
+  params: TemplateToken[];
 }
 
 /** Template slots — feedback has a PDF-less fallback. */
-export type TemplateSlot = ScheduledKind | 'feedback_no_pdf'
+export type TemplateSlot = ScheduledKind | 'feedback_no_pdf';
 export const TEMPLATE_SLOTS: TemplateSlot[] = [
   'feedback',
   'feedback_no_pdf',
   'expiry_reminder',
   'birthday',
   'anniversary',
-]
+];
 
 export const DEFAULT_TEMPLATE_PARAMS: Record<TemplateSlot, TemplateToken[]> = {
   feedback: ['name', 'points_earned', 'active_points', 'review_url'],
@@ -72,27 +68,27 @@ export const DEFAULT_TEMPLATE_PARAMS: Record<TemplateSlot, TemplateToken[]> = {
   expiry_reminder: ['name', 'expiring_points', 'expiry_date', 'active_value'],
   birthday: ['name', 'bonus_points'],
   anniversary: ['name', 'bonus_points'],
-}
+};
 
 export interface LoyaltySettings {
-  account_id: string
-  enabled: boolean
-  amount_per_point: number
-  bonus_value: number
-  base_value: number
-  bonus_months: number
-  expiry_months: number
-  birthday_points: number
-  anniversary_points: number
-  google_review_url: string | null
-  store_name: string | null
-  timezone: string
-  send_hour: number
-  reminder_days: number[]
-  templates: Partial<Record<TemplateSlot, TemplateConfig>>
-  points_keywords: string[]
-  orders_keywords: string[]
-  occasions_last_run: string | null
+  account_id: string;
+  enabled: boolean;
+  amount_per_point: number;
+  bonus_value: number;
+  base_value: number;
+  bonus_months: number;
+  expiry_months: number;
+  birthday_points: number;
+  anniversary_points: number;
+  google_review_url: string | null;
+  store_name: string | null;
+  timezone: string;
+  send_hour: number;
+  reminder_days: number[];
+  templates: Partial<Record<TemplateSlot, TemplateConfig>>;
+  points_keywords: string[];
+  orders_keywords: string[];
+  occasions_last_run: string | null;
 }
 
 export function defaultLoyaltySettings(accountId: string): LoyaltySettings {
@@ -115,22 +111,24 @@ export function defaultLoyaltySettings(accountId: string): LoyaltySettings {
     points_keywords: ['points', 'point', 'loyalty', 'balance'],
     orders_keywords: ['order', 'orders', 'purchase', 'purchases', 'invoice'],
     occasions_last_run: null,
-  }
+  };
 }
 
 /** Normalise a DB row (NUMERIC comes back as string) into settings. */
 export function parseLoyaltySettings(
   accountId: string,
-  row: Record<string, unknown> | null | undefined,
+  row: Record<string, unknown> | null | undefined
 ): LoyaltySettings {
-  const d = defaultLoyaltySettings(accountId)
-  if (!row) return d
+  const d = defaultLoyaltySettings(accountId);
+  if (!row) return d;
   const num = (v: unknown, fallback: number) => {
-    const n = typeof v === 'number' ? v : Number(v)
-    return Number.isFinite(n) ? n : fallback
-  }
+    const n = typeof v === 'number' ? v : Number(v);
+    return Number.isFinite(n) ? n : fallback;
+  };
   const strArr = (v: unknown, fallback: string[]) =>
-    Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : fallback
+    Array.isArray(v)
+      ? v.filter((x): x is string => typeof x === 'string')
+      : fallback;
   return {
     account_id: accountId,
     enabled: typeof row.enabled === 'boolean' ? row.enabled : d.enabled,
@@ -146,7 +144,9 @@ export function parseLoyaltySettings(
     timezone: (row.timezone as string) || d.timezone,
     send_hour: num(row.send_hour, d.send_hour),
     reminder_days: Array.isArray(row.reminder_days)
-      ? (row.reminder_days as unknown[]).map(Number).filter((n) => Number.isFinite(n) && n > 0)
+      ? (row.reminder_days as unknown[])
+          .map(Number)
+          .filter((n) => Number.isFinite(n) && n > 0)
       : d.reminder_days,
     templates:
       row.templates && typeof row.templates === 'object'
@@ -155,19 +155,19 @@ export function parseLoyaltySettings(
     points_keywords: strArr(row.points_keywords, d.points_keywords),
     orders_keywords: strArr(row.orders_keywords, d.orders_keywords),
     occasions_last_run: (row.occasions_last_run as string | null) ?? null,
-  }
+  };
 }
 
 export interface LoyaltyLot {
-  id: string
-  contact_id: string
-  invoice_id: string | null
-  source: LotSource
-  points: number
-  remaining: number
-  earned_at: string
-  bonus_until: string
-  expires_at: string
+  id: string;
+  contact_id: string;
+  invoice_id: string | null;
+  source: LotSource;
+  points: number;
+  remaining: number;
+  earned_at: string;
+  bonus_until: string;
+  expires_at: string;
 }
 
 export function parseLot(row: Record<string, unknown>): LoyaltyLot {
@@ -181,5 +181,5 @@ export function parseLot(row: Record<string, unknown>): LoyaltyLot {
     earned_at: row.earned_at as string,
     bonus_until: row.bonus_until as string,
     expires_at: row.expires_at as string,
-  }
+  };
 }

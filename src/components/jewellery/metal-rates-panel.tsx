@@ -8,7 +8,14 @@ import { createClient } from '@/lib/supabase/client';
 import { useCan } from '@/hooks/use-can';
 import { GatedButton } from '@/components/ui/gated-button';
 import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { dateFmt, fetchJson, inrFmt, MetalChip, Spinner } from './shared';
 
 interface Rate {
@@ -29,7 +36,9 @@ const DEFAULT_PURITIES: { metal: 'gold' | 'silver'; purity: string }[] = [
 ];
 
 function todayIst(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(
+    new Date()
+  );
 }
 
 export function MetalRatesPanel() {
@@ -66,13 +75,25 @@ export function MetalRatesPanel() {
   const purities = [
     ...DEFAULT_PURITIES,
     ...[...new Set(history.map((r) => `${r.metal}|${r.purity}`))]
-      .map((k) => ({ metal: k.split('|')[0] as 'gold' | 'silver', purity: k.split('|')[1] }))
-      .filter((p) => !DEFAULT_PURITIES.some((d) => d.metal === p.metal && d.purity === p.purity)),
+      .map((k) => ({
+        metal: k.split('|')[0] as 'gold' | 'silver',
+        purity: k.split('|')[1],
+      }))
+      .filter(
+        (p) =>
+          !DEFAULT_PURITIES.some(
+            (d) => d.metal === p.metal && d.purity === p.purity
+          )
+      ),
   ];
 
   async function save() {
     const rates = purities
-      .map((p) => ({ ...p, rate_per_gram: values[`${p.metal}|${p.purity}`], effective_date: date }))
+      .map((p) => ({
+        ...p,
+        rate_per_gram: values[`${p.metal}|${p.purity}`],
+        effective_date: date,
+      }))
       .filter((r) => r.rate_per_gram && Number(r.rate_per_gram) > 0);
     if (rates.length === 0) {
       toast.error(t('errorNone'));
@@ -80,7 +101,9 @@ export function MetalRatesPanel() {
     }
     setSaving(true);
     try {
-      const { results } = await fetchJson<{ results: { ok: boolean; error?: string }[] }>('/api/metal-rates', {
+      const { results } = await fetchJson<{
+        results: { ok: boolean; error?: string }[];
+      }>('/api/metal-rates', {
         method: 'POST',
         body: JSON.stringify({ rates }),
       });
@@ -99,13 +122,20 @@ export function MetalRatesPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className="border-border bg-card rounded-xl border p-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-foreground">{t('todayTitle')}</h2>
-            <p className="text-xs text-muted-foreground">{t('todayHint')}</p>
+            <h2 className="text-foreground text-sm font-semibold">
+              {t('todayTitle')}
+            </h2>
+            <p className="text-muted-foreground text-xs">{t('todayHint')}</p>
           </div>
-          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-44" />
+          <Input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-44"
+          />
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {purities.map((p) => {
@@ -117,22 +147,34 @@ export function MetalRatesPanel() {
                   inputMode="decimal"
                   placeholder={t('perGram')}
                   value={values[k] ?? ''}
-                  onChange={(e) => setValues((v) => ({ ...v, [k]: e.target.value }))}
+                  onChange={(e) =>
+                    setValues((v) => ({ ...v, [k]: e.target.value }))
+                  }
                 />
               </label>
             );
           })}
         </div>
         <div className="mt-4 flex justify-end">
-          <GatedButton canAct={canEdit} gateReason="update metal rates" onClick={save} disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          <GatedButton
+            canAct={canEdit}
+            gateReason="update metal rates"
+            onClick={save}
+            disabled={saving}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
             {t('save')}
           </GatedButton>
         </div>
       </div>
 
       {history.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-border bg-card">
+        <div className="border-border bg-card overflow-x-auto rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
@@ -144,11 +186,15 @@ export function MetalRatesPanel() {
             <TableBody>
               {history.map((r) => (
                 <TableRow key={r.id} className="border-border">
-                  <TableCell className="text-muted-foreground">{dateFmt(`${r.effective_date}T12:00:00+05:30`)}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {dateFmt(`${r.effective_date}T12:00:00+05:30`)}
+                  </TableCell>
                   <TableCell>
                     <MetalChip metal={r.metal} purity={r.purity} />
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">{inrFmt(r.rate_per_gram)}/g</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {inrFmt(r.rate_per_gram)}/g
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

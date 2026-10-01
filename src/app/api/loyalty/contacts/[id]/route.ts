@@ -1,19 +1,24 @@
-import { NextResponse } from 'next/server'
-import { getCurrentAccount, toErrorResponse } from '@/lib/auth/account'
-import { getContactSummary, getLoyaltySettings } from '@/lib/loyalty/service'
+import { NextResponse } from 'next/server';
+import { getCurrentAccount, toErrorResponse } from '@/lib/auth/account';
+import { getContactSummary, getLoyaltySettings } from '@/lib/loyalty/service';
 
 // Loyalty card for one customer: summary, lots, recent invoices and
 // redemptions. RLS-scoped through the caller's session.
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { supabase, accountId } = await getCurrentAccount()
-    const { id } = await params
-    const settings = await getLoyaltySettings(supabase, accountId)
+    const { supabase, accountId } = await getCurrentAccount();
+    const { id } = await params;
+    const settings = await getLoyaltySettings(supabase, accountId);
     const [{ summary, lots }, invoices, redemptions] = await Promise.all([
       getContactSummary(supabase, accountId, id, settings),
       supabase
         .from('invoices')
-        .select('id, external_id, invoice_date, total, points_earned, points_redeemed')
+        .select(
+          'id, external_id, invoice_date, total, points_earned, points_redeemed'
+        )
         .eq('account_id', accountId)
         .eq('contact_id', id)
         .order('invoice_date', { ascending: false })
@@ -25,7 +30,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
         .eq('contact_id', id)
         .order('created_at', { ascending: false })
         .limit(20),
-    ])
+    ]);
     return NextResponse.json({
       settings: {
         bonus_value: settings.bonus_value,
@@ -36,8 +41,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       lots,
       invoices: invoices.data ?? [],
       redemptions: redemptions.data ?? [],
-    })
+    });
   } catch (err) {
-    return toErrorResponse(err)
+    return toErrorResponse(err);
   }
 }

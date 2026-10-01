@@ -35,7 +35,19 @@ export interface InventoryItem {
 }
 
 type Form = Record<
-  'sku' | 'name' | 'category' | 'metal' | 'purity' | 'gross_weight' | 'stone_weight' | 'net_weight' | 'making_charge_type' | 'making_charge' | 'priority' | 'status' | 'notes',
+  | 'sku'
+  | 'name'
+  | 'category'
+  | 'metal'
+  | 'purity'
+  | 'gross_weight'
+  | 'stone_weight'
+  | 'net_weight'
+  | 'making_charge_type'
+  | 'making_charge'
+  | 'priority'
+  | 'status'
+  | 'notes',
   string
 >;
 
@@ -79,20 +91,30 @@ export function InventoryItemDialog({
     if (open) setForm(toForm(item, defaultMetal));
   }, [open, item, defaultMetal]);
 
-  const set = (k: keyof Form) => (e: { target: { value: string } }) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const set = (k: keyof Form) => (e: { target: { value: string } }) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }));
 
   async function save() {
     setSaving(true);
     try {
-      const body = { ...form, net_weight: form.net_weight === '' ? undefined : form.net_weight };
+      const body = {
+        ...form,
+        net_weight: form.net_weight === '' ? undefined : form.net_weight,
+      };
       if (item) {
-        await fetchJson(`/api/inventory/${item.id}`, { method: 'PATCH', body: JSON.stringify(body) });
+        await fetchJson(`/api/inventory/${item.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify(body),
+        });
       } else {
-        const { results } = await fetchJson<{ results: { ok: boolean; error?: string }[] }>('/api/inventory', {
+        const { results } = await fetchJson<{
+          results: { ok: boolean; error?: string }[];
+        }>('/api/inventory', {
           method: 'POST',
           body: JSON.stringify({ items: [body] }),
         });
-        if (!results[0]?.ok) throw new Error(results[0]?.error ?? t('errorSave'));
+        if (!results[0]?.ok)
+          throw new Error(results[0]?.error ?? t('errorSave'));
       }
       toast.success(t('toastSaved'));
       onOpenChange(false);
@@ -104,10 +126,17 @@ export function InventoryItemDialog({
     }
   }
 
-  const field = (k: keyof Form, opts: { decimal?: boolean; label?: string } = {}) => (
+  const field = (
+    k: keyof Form,
+    opts: { decimal?: boolean; label?: string } = {}
+  ) => (
     <div className="space-y-1.5">
       <Label>{opts.label ?? tf(k)}</Label>
-      <Input value={form[k]} onChange={set(k)} inputMode={opts.decimal ? 'decimal' : undefined} />
+      <Input
+        value={form[k]}
+        onChange={set(k)}
+        inputMode={opts.decimal ? 'decimal' : undefined}
+      />
     </div>
   );
 
@@ -122,7 +151,11 @@ export function InventoryItemDialog({
           {field('name')}
           <div className="space-y-1.5">
             <Label>{tf('metal')}</Label>
-            <NativeSelect className="w-full" value={form.metal} onChange={set('metal')}>
+            <NativeSelect
+              className="w-full"
+              value={form.metal}
+              onChange={set('metal')}
+            >
               <option value="gold">{t('gold')}</option>
               <option value="silver">{t('silver')}</option>
             </NativeSelect>
@@ -131,7 +164,11 @@ export function InventoryItemDialog({
           {field('category')}
           <div className="space-y-1.5">
             <Label>{tf('status')}</Label>
-            <NativeSelect className="w-full" value={form.status} onChange={set('status')}>
+            <NativeSelect
+              className="w-full"
+              value={form.status}
+              onChange={set('status')}
+            >
               <option value="in_stock">{t('status.in_stock')}</option>
               <option value="reserved">{t('status.reserved')}</option>
               <option value="sold">{t('status.sold')}</option>
@@ -143,7 +180,11 @@ export function InventoryItemDialog({
           {field('priority')}
           <div className="space-y-1.5">
             <Label>{tf('making_charge_type')}</Label>
-            <NativeSelect className="w-full" value={form.making_charge_type} onChange={set('making_charge_type')}>
+            <NativeSelect
+              className="w-full"
+              value={form.making_charge_type}
+              onChange={set('making_charge_type')}
+            >
               <option value="per_gram">{t('making.per_gram')}</option>
               <option value="percent">{t('making.percent')}</option>
               <option value="fixed">{t('making.fixed')}</option>
@@ -156,10 +197,18 @@ export function InventoryItemDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={saving}
+          >
             {t('cancel')}
           </Button>
-          <Button onClick={save} disabled={saving || !form.sku.trim()} className="bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button
+            onClick={save}
+            disabled={saving || !form.sku.trim()}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             {t('save')}
           </Button>

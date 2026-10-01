@@ -14,22 +14,26 @@
 // are harmless.
 // ============================================================
 
-import type { InvoiceInput } from '@/lib/loyalty/invoices'
+import type { InvoiceInput } from '@/lib/loyalty/invoices';
 
 export interface VasyCredentials {
-  baseUrl: string
-  apiKey: string
+  baseUrl: string;
+  apiKey: string;
 }
 
 export interface VasyConnector {
-  fetchInvoicesSince(since: Date): Promise<InvoiceInput[]>
+  fetchInvoicesSince(since: Date): Promise<InvoiceInput[]>;
 }
 
-export function createVasyConnector(credentials: VasyCredentials): VasyConnector {
-  void credentials
+export function createVasyConnector(
+  credentials: VasyCredentials
+): VasyConnector {
+  void credentials;
   return {
     async fetchInvoicesSince() {
-      throw new Error('Vasy ERP connector is not configured yet — share the Vasy API docs to enable it')
+      throw new Error(
+        'Vasy ERP connector is not configured yet — share the Vasy API docs to enable it'
+      );
     },
-  }
+  };
 }

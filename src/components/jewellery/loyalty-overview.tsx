@@ -4,7 +4,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Cake, Heart } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { dateFmt, dayMonthFmt, inrFmt, ptsFmt, Spinner, StatCard } from './shared';
+import {
+  dateFmt,
+  dayMonthFmt,
+  inrFmt,
+  ptsFmt,
+  Spinner,
+  StatCard,
+} from './shared';
 
 interface LotRow {
   contact_id: string;
@@ -34,7 +41,13 @@ function daysUntil(md: string, today: Date): number {
   return Math.round((next - base) / DAY);
 }
 
-export function LoyaltyOverview({ bonusValue, baseValue }: { bonusValue: number; baseValue: number }) {
+export function LoyaltyOverview({
+  bonusValue,
+  baseValue,
+}: {
+  bonusValue: number;
+  baseValue: number;
+}) {
   const t = useTranslations('Jewellery.overview');
   const [lots, setLots] = useState<LotRow[] | null>(null);
   const [people, setPeople] = useState<PersonRow[]>([]);
@@ -45,7 +58,9 @@ export function LoyaltyOverview({ bonusValue, baseValue }: { bonusValue: number;
       const [l, p] = await Promise.all([
         supabase
           .from('loyalty_lots')
-          .select('contact_id, remaining, bonus_until, expires_at, contact:contacts(name, phone)')
+          .select(
+            'contact_id, remaining, bonus_until, expires_at, contact:contacts(name, phone)'
+          )
           .gt('remaining', 0)
           .gt('expires_at', new Date().toISOString())
           .order('expires_at', { ascending: true })
@@ -68,7 +83,10 @@ export function LoyaltyOverview({ bonusValue, baseValue }: { bonusValue: number;
     let value = 0;
     let expiring30 = 0;
     const customers = new Set<string>();
-    const soon = new Map<string, { name: string; phone: string; points: number; expiresAt: string }>();
+    const soon = new Map<
+      string,
+      { name: string; phone: string; points: number; expiresAt: string }
+    >();
     for (const lot of lots) {
       const rate = new Date(lot.bonus_until) > now ? bonusValue : baseValue;
       points += lot.remaining;
@@ -87,18 +105,37 @@ export function LoyaltyOverview({ bonusValue, baseValue }: { bonusValue: number;
           });
       }
     }
-    return { points, value, expiring30, customers: customers.size, soon: [...soon.values()] };
+    return {
+      points,
+      value,
+      expiring30,
+      customers: customers.size,
+      soon: [...soon.values()],
+    };
   }, [lots, now, bonusValue, baseValue]);
 
   const occasions = useMemo(() => {
     const ist = new Date(now.getTime() + 330 * 60_000);
-    const out: { kind: 'birthday' | 'anniversary'; name: string; phone: string; date: string; inDays: number }[] = [];
+    const out: {
+      kind: 'birthday' | 'anniversary';
+      name: string;
+      phone: string;
+      date: string;
+      inDays: number;
+    }[] = [];
     for (const p of people) {
       for (const kind of ['birthday', 'anniversary'] as const) {
         const d = p[kind];
         if (!d) continue;
         const inDays = daysUntil(d, ist);
-        if (inDays <= 7) out.push({ kind, name: p.name ?? p.phone, phone: p.phone, date: d, inDays });
+        if (inDays <= 7)
+          out.push({
+            kind,
+            name: p.name ?? p.phone,
+            phone: p.phone,
+            date: d,
+            inDays,
+          });
       }
     }
     return out.sort((a, b) => a.inDays - b.inDays);
@@ -110,27 +147,46 @@ export function LoyaltyOverview({ bonusValue, baseValue }: { bonusValue: number;
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label={t('activePoints')} value={ptsFmt(stats.points)} />
-        <StatCard label={t('liability')} value={inrFmt(stats.value)} hint={t('liabilityHint')} />
+        <StatCard
+          label={t('liability')}
+          value={inrFmt(stats.value)}
+          hint={t('liabilityHint')}
+        />
         <StatCard label={t('expiring30')} value={ptsFmt(stats.expiring30)} />
         <StatCard label={t('customers')} value={ptsFmt(stats.customers)} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className="rounded-xl border border-border bg-card p-4">
-          <h2 className="text-sm font-semibold text-foreground">{t('expiringTitle')}</h2>
+        <section className="border-border bg-card rounded-xl border p-4">
+          <h2 className="text-foreground text-sm font-semibold">
+            {t('expiringTitle')}
+          </h2>
           {stats.soon.length === 0 ? (
-            <p className="mt-2 text-sm text-muted-foreground">{t('expiringNone')}</p>
+            <p className="text-muted-foreground mt-2 text-sm">
+              {t('expiringNone')}
+            </p>
           ) : (
-            <ul className="mt-2 max-h-96 divide-y divide-border overflow-y-auto">
+            <ul className="divide-border mt-2 max-h-96 divide-y overflow-y-auto">
               {stats.soon.map((s) => (
-                <li key={s.phone} className="flex items-center justify-between gap-2 py-2 text-sm">
+                <li
+                  key={s.phone}
+                  className="flex items-center justify-between gap-2 py-2 text-sm"
+                >
                   <span className="min-w-0">
-                    <span className="block truncate text-foreground">{s.name}</span>
-                    <span className="block text-xs text-muted-foreground">{s.phone}</span>
+                    <span className="text-foreground block truncate">
+                      {s.name}
+                    </span>
+                    <span className="text-muted-foreground block text-xs">
+                      {s.phone}
+                    </span>
                   </span>
                   <span className="shrink-0 text-right">
-                    <span className="block tabular-nums text-foreground">{ptsFmt(s.points)} pts</span>
-                    <span className="block text-xs text-muted-foreground">{t('from', { date: dateFmt(s.expiresAt) })}</span>
+                    <span className="text-foreground block tabular-nums">
+                      {ptsFmt(s.points)} pts
+                    </span>
+                    <span className="text-muted-foreground block text-xs">
+                      {t('from', { date: dateFmt(s.expiresAt) })}
+                    </span>
                   </span>
                 </li>
               ))}
@@ -138,27 +194,41 @@ export function LoyaltyOverview({ bonusValue, baseValue }: { bonusValue: number;
           )}
         </section>
 
-        <section className="rounded-xl border border-border bg-card p-4">
-          <h2 className="text-sm font-semibold text-foreground">{t('occasionsTitle')}</h2>
+        <section className="border-border bg-card rounded-xl border p-4">
+          <h2 className="text-foreground text-sm font-semibold">
+            {t('occasionsTitle')}
+          </h2>
           {occasions.length === 0 ? (
-            <p className="mt-2 text-sm text-muted-foreground">{t('occasionsNone')}</p>
+            <p className="text-muted-foreground mt-2 text-sm">
+              {t('occasionsNone')}
+            </p>
           ) : (
-            <ul className="mt-2 max-h-96 divide-y divide-border overflow-y-auto">
+            <ul className="divide-border mt-2 max-h-96 divide-y overflow-y-auto">
               {occasions.map((o) => (
-                <li key={`${o.kind}-${o.phone}`} className="flex items-center justify-between gap-2 py-2 text-sm">
+                <li
+                  key={`${o.kind}-${o.phone}`}
+                  className="flex items-center justify-between gap-2 py-2 text-sm"
+                >
                   <span className="flex min-w-0 items-center gap-2">
                     {o.kind === 'birthday' ? (
-                      <Cake className="h-4 w-4 shrink-0 text-primary" />
+                      <Cake className="text-primary h-4 w-4 shrink-0" />
                     ) : (
-                      <Heart className="h-4 w-4 shrink-0 text-primary" />
+                      <Heart className="text-primary h-4 w-4 shrink-0" />
                     )}
                     <span className="min-w-0">
-                      <span className="block truncate text-foreground">{o.name}</span>
-                      <span className="block text-xs text-muted-foreground">{o.phone}</span>
+                      <span className="text-foreground block truncate">
+                        {o.name}
+                      </span>
+                      <span className="text-muted-foreground block text-xs">
+                        {o.phone}
+                      </span>
                     </span>
                   </span>
-                  <span className="shrink-0 text-right text-xs text-muted-foreground">
-                    {dayMonthFmt(o.date)} · {o.inDays === 0 ? t('today') : t('inDays', { days: o.inDays })}
+                  <span className="text-muted-foreground shrink-0 text-right text-xs">
+                    {dayMonthFmt(o.date)} ·{' '}
+                    {o.inDays === 0
+                      ? t('today')
+                      : t('inDays', { days: o.inDays })}
                   </span>
                 </li>
               ))}
